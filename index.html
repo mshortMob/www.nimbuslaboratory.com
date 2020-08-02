@@ -63,8 +63,8 @@
 				geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
 
 				parameters = [
-					[[ 1.0, 0.2, 0.5 ], sprite1, 20 ],
-					[[ 1.0, 0.2, 0.5 ], sprite2, 20 ],
+					[[ 1.0, 1.0, 1.0 ], sprite1, 30 ],
+					[[ .5, 0.9, 1.0 ], sprite2, 20 ],
 				];
 
 				for ( var i = 0; i < parameters.length; i ++ ) {
@@ -179,14 +179,14 @@
 
 				}
 
-				for ( var i = 0; i < materials.length; i ++ ) {
+				// for ( var i = 0; i < materials.length; i ++ ) {
 
-					var color = parameters[ i ][ 0 ];
+				// 	var color = parameters[ i ][ 0 ];
 
-					var h = ( 360 * ( color[ 0 ] + time ) % 360 ) / 360;
-					materials[ i ].color.setHSL( h, color[ 1 ], color[ 2 ] );
+				// 	var h = ( 360 * ( color[ 0 ] + time ) % 360 ) / 360;
+				// 	materials[ i ].color.setHSL( h, color[ 1 ], color[ 2 ] );
 
-				}
+				// }
 
 				renderer.render( scene, camera );
 
