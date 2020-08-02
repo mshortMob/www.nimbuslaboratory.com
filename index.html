@@ -49,6 +49,7 @@
 
 				var sprite1 = textureLoader.load( 'sprites/sprite1.png' );
 				var sprite2 = textureLoader.load( 'sprites/sprite2.png' );
+				var sprite3 = textureLoader.load( 'sprites/sprite3.png' );
 
 				for ( var i = 0; i < 10000; i ++ ) {
 
@@ -65,6 +66,7 @@
 				parameters = [
 					[[ 1.0, 1.0, 1.0 ], sprite1, 30 ],
 					[[ .5, 0.9, 1.0 ], sprite2, 20 ],
+					[[ .6, 1.0, 0.5 ], sprite3, 25 ]
 				];
 
 				for ( var i = 0; i < parameters.length; i ++ ) {
@@ -173,20 +175,15 @@
 
 					if ( object instanceof THREE.Points ) {
 
-						object.rotation.y = time * ( i < 4 ? i + 1 : - ( i + 1 ) );
+						if(i==0){
+							object.rotation.x = time/7 * ( i < 4 ? i + 1 : - ( i + 1 ) );
+						}else{
+							object.rotation.y = time/7 * ( i < 4 ? i + 1 : - ( i + 1 ) );
+						}
 
 					}
 
 				}
-
-				// for ( var i = 0; i < materials.length; i ++ ) {
-
-				// 	var color = parameters[ i ][ 0 ];
-
-				// 	var h = ( 360 * ( color[ 0 ] + time ) % 360 ) / 360;
-				// 	materials[ i ].color.setHSL( h, color[ 1 ], color[ 2 ] );
-
-				// }
 
 				renderer.render( scene, camera );
 
