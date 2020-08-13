@@ -93,7 +93,12 @@
 				renderer = new THREE.WebGLRenderer();
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.domElement.id="renderCanvas";
 				document.body.appendChild( renderer.domElement );
+
+				renderer.domElement.onclick=function(){
+					goToMandlebulbs();
+				};
 
 				//
 
@@ -189,6 +194,9 @@
 
 			}
 
+			function goToMandlebulbs(){
+				window.location.replace("http://"+location.hostname+"/static/mandlebulbs/index.html");
+			}
 		</script>
 	
 
