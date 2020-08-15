@@ -171,6 +171,10 @@
 
 				camera.position.x += ( mouseX - camera.position.x ) * 0.05;
 				camera.position.y += ( - mouseY - camera.position.y ) * 0.05;
+				camera.position.z -= 2.5;
+				if(camera.position.z<300.0){
+					goToNextPage();
+				}
 
 				camera.lookAt( scene.position );
 

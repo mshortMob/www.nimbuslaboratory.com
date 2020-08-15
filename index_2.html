@@ -263,23 +263,29 @@
 
 				if ( toggle > 0.02 && intersection !== null ) {
 
-					spheres[ spheresIndex ].position.copy( intersection.point );
-					spheres[ spheresIndex ].scale.set( 1, 1, 1 );
-					spheresIndex = ( spheresIndex + 1 ) % spheres.length;
+					// spheres[ spheresIndex ].position.copy( intersection.point );
+					// spheres[ spheresIndex ].scale.set( 1, 1, 1 );
+					// spheresIndex = ( spheresIndex + 1 ) % spheres.length;
 
-					toggle = 0;
-
-				}
-
-				for ( var i = 0; i < spheres.length; i ++ ) {
-
-					var sphere = spheres[ i ];
-					sphere.scale.multiplyScalar( 0.98 );
-					sphere.scale.clampScalar( 0.01, 1 );
+					// toggle = 0;
 
 				}
 
-				toggle += clock.getDelta();
+				// for ( var i = 0; i < spheres.length; i ++ ) {
+
+				// 	var sphere = spheres[ i ];
+				// 	sphere.scale.multiplyScalar( 0.98 );
+				// 	sphere.scale.clampScalar( 0.01, 1 );
+
+				// }
+
+				// toggle += clock.getDelta();
+
+				camera.position.z -= .0066;
+				// console.log(camera.position.z)
+				if(camera.position.z<-.4){
+					goToNextPage();
+				}
 
 				renderer.render( scene, camera );
 
