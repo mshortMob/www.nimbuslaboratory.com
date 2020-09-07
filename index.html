@@ -13,16 +13,41 @@
 			height:100%;
 			top:0px;
 			left:0px;
-			z-index:10;
+			z-index:2;
 			transform:scale(1,1);
 			position:fixed;
 			float:left;
 			object-fit:fill;
 			/* cursor: none; */
 		}
+		#header{
+			background-color: black;
+			position:absolute;
+			width:100%;
+			top:0%;
+			height:60px;
+			z-index:10;
+			border-bottom:2px solid grey;
+		}
+		.headerItem{
+			color:white;
+			width:14%;
+			top:20px;
+			left:62%;
+			position:relative;
+			display:inline-block;
+		}
+		.headerItem:hover{
+			color:blue;
+		}
 	</style>
 </head>
-	<body cz-shortcut-listen="true">
+	<body cz-s5t-listen="true">
+		<div id="header">
+			<a class="headerItem">Mandlebulbs</a>
+			<a class="headerItem">Projects</a>
+			<a class="headerItem">About Us</a>
+		</div>
 		<script type="module">
 			import * as THREE from './dependancies/three.module.js';
 
