@@ -81,7 +81,7 @@
 			<div class="header-item"></div>
 			<div class="header-item"></div>
 			<div class="header-item" onclick="goToPage('mandlebulbs');">Mandlebulbs</div>  
-			<div class="header-item" onclick="goToPage('projects');">Projects</div>
+			<div class="header-item" onclick="goToPage('FlowMapper Demo');">FlowMapper</div>
 			<div class="header-item" onclick="goToPage('about');">About Us</div>
 		</div>
 
@@ -111,10 +111,8 @@
 					document.getElementById('renderCanvas').style.display="none";
 					document.getElementById('about').style.display="none";
 				}
-				if(pageName=="projects"){
-					document.getElementById('mandlebulbs').style.display="none";
-					document.getElementById('renderCanvas').style.display="inline";
-					document.getElementById('about').style.display="none";
+				if(pageName=="FlowMapper Demo"){
+					window.location.replace("https://flowmapper.s3.amazonaws.com/index.html");
 				}
 				if(pageName=="about"){
 					document.getElementById('mandlebulbs').style.display="none";
