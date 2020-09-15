@@ -1,0 +1,20 @@
+precision mediump float;
+precision mediump int;
+
+uniform float time;
+uniform float brightness;
+
+uniform float audioVolume;
+varying vec2 vUv;
+uniform sampler2D maskTexture;
+
+void main( void ) {
+	vec3 col = vec3(0.0);
+	
+	col.r = vUv.x+sin(time);
+	col.b = vUv.y+cos(time);		
+	col.g = vUv.y+sin(time+1.57/2.0);
+	vec3 mask = texture2D( maskTexture, vUv ).rgb;
+	gl_FragColor = vec4(col,mask.r*brightness);
+
+}
