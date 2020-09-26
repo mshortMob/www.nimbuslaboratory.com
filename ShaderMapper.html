@@ -420,8 +420,8 @@ void main()	{
 				globalFolder=gui.addFolder( "Global" )
 				globalFolder.open();
 				globalFolder.add(globalController, "selectedObject", 0, 3, 1 ).onChange(function(){globalController.selectedObject=parseInt(globalController.selectedObject);updateControlsView();syncObjectsToJson();});
-				globalFolder.add(globalController, "ShaderA", 1, 48, 1 ).onChange(function(){globalController.ShaderA=parseInt(globalController.ShaderA);loadShaderPreset(1);updateControlsValues();});				
-				globalFolder.add(globalController, "ShaderB", 1, 48, 1 ).onChange(function(){globalController.ShaderB=parseInt(globalController.ShaderB);loadShaderPreset(2);updateControlsValues();});								
+				globalFolder.add(globalController, "ShaderA", 1, 52, 1 ).onChange(function(){globalController.ShaderA=parseInt(globalController.ShaderA);loadShaderPreset(1);updateControlsValues();});				
+				globalFolder.add(globalController, "ShaderB", 1, 52, 1 ).onChange(function(){globalController.ShaderB=parseInt(globalController.ShaderB);loadShaderPreset(2);updateControlsValues();});								
 				globalFolder.add(globalController, "MaskA", 1, 6, 1 ).onChange(function(){globalController.MaskA=parseInt(globalController.MaskA); changeMask(1); updateControlsValues();});				
 				globalFolder.add(globalController, "MaskB", 1, 6, 1 ).onChange(function(){globalController.MaskB=parseInt(globalController.MaskB); changeMask(2); updateControlsValues();});
 				globalFolder.add( globalController, "BrightnessA", 0.0,1.0,.001 ).onChange(function(){updateControlsValues();});			
