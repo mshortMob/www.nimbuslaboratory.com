@@ -127,10 +127,13 @@
 				font-weight:bold;
 				text-align: center;
 				z-index:10;
-				border-bottom:2px solid grey;
-				border-top:2px solid grey;
+				border-bottom:1px solid grey;
+				/* border-top:1px solid grey; */
 				display:block;
 		    }
+			#mobile-dropdown-last-item{
+				border-bottom:2px solid grey;
+			}
 			body{
 				margin:0px;
 				background-color:black;
@@ -209,7 +212,7 @@
 				background-repeat: no-repeat;
 				padding-left:10px;
 			}
-			.header-item:hover{
+			.header-item:hover,.mobile-dropdown-item:hover{
 				color:darkgrey;
 			}
 			#header_logo{
@@ -277,7 +280,7 @@
 			<div class="mobile-dropdown-item" onclick="goToPage('mandlebulbs');">Mandlebulbs</div>
 			<div class="mobile-dropdown-item" onclick="goToPage('ShaderMapper Demo');">ShaderMapper</div>
 			<div class="mobile-dropdown-item" onclick="goToPage('FlowMapper Demo');">FlowMapper</div>
-			<div class="mobile-dropdown-item" onclick="goToPage('about');">About Us</div>
+			<div class="mobile-dropdown-item" id="mobile-dropdown-last-item" onclick="goToPage('about');">About Us</div>
 		</div>
 
 		<div id="mandlebulbs"></div>
