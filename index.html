@@ -111,6 +111,13 @@
 				margin-top:0px;
 				margin-bottom:35px;
 			}
+			#paulImage{
+				position:relative;
+				top:50px;
+				left:30%;
+				width:40%;
+				height:70%;
+			}
 		}
 		@media only screen and (max-width:800px){
 			.mobile-dropdown{
@@ -264,6 +271,13 @@
 				margin-top:0px;
 				margin-bottom:35px;
 			}
+			#paulImage{
+				position:relative;
+				top:50px;
+				left:10%;
+				width:80%;
+				height:70%;
+			}
 		}
 	</style>
 </head>
@@ -300,11 +314,10 @@
 		<div id="mandlebulbs"></div>
 
 		<div id="about">
-			<!-- <iframe id="expRecapVideo" width="560" height="315" src="https://www.youtube.com/embed/yqjmwCJKtQE" frameborder="0" allowfullscreen></iframe> -->
-			<!-- <video width="320" height="240" autoplay></video> -->
-			<video id="expRecapVideo" controls>
+			<video id="expRecapVideo" controls style="display:none">
 				<source src="http://www.nimbuslaboratory.com/static/NimbusPi/Experiment_009_Recap.mp4" type="video/mp4">
 			</video>
+			<img id="paulImage" src="assets/paul.jpg" alt="paul" onclick="hidePaul()">
 		</div>
 
 		<script>
@@ -379,6 +392,11 @@
 				}else{
 					dropDownElem.style.display='grid'
 				}
+			}
+		
+			function hidePaul(){
+				document.getElementById("expRecapVideo").style.display="block";
+				document.getElementById("paulImage").style.display="none";
 			}
 		</script>
 
