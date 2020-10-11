@@ -3,97 +3,281 @@
 	<title>Nimbus Labs</title>
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 	<style>
-		body{
-			margin:0px;
-			background-color:black;
-		}	
-		canvas{
-			opacity: 1;
-			width:100%;
-			height:100%;
-			top:0px;
-			left:0px;
-			z-index:0;
-			transform:scale(1,1);
-			position:fixed;
-			float:left;
-			object-fit:fill;
-			/* cursor: none; */
+		@media only screen and (min-width:800px){
+			body{
+				margin:0px;
+				background-color:black;
+			}	
+			canvas{
+				opacity: 1;
+				width:100%;
+				height:100%;
+				top:0px;
+				left:0px;
+				z-index:0;
+				transform:scale(1,1);
+				position:fixed;
+				float:left;
+				object-fit:fill;
+				/* cursor: none; */
+			}
+			.header {
+				width:100%;
+				display: grid;
+				grid-template-columns: auto auto auto auto auto auto auto auto auto auto auto;
+				background-color: black;
+				padding: 0px;
+				height:60px;
+				z-index:10;
+				
+			}
+			.header-item {
+				color:white;
+				background-color: black;
+				padding: 20px;
+				font-size: 19px;
+				font-weight:bold;
+				text-align: center;
+				z-index:10;
+				border-bottom:2px solid grey;
+				border-top:2px solid grey;
+			}
+			.mobile-header {
+				width:100%;
+				display: grid;
+				grid-template-columns: auto auto auto auto auto auto auto auto auto auto auto;
+				background-color: black;
+				padding: 0px;
+				height:60px;
+				z-index:10;
+				display:none;
+			}
+			.mobile-header-item {
+				color:white;
+				background-color: black;
+				padding: 20px;
+				font-size: 19px;
+				font-weight:bold;
+				text-align: center;
+				z-index:10;
+				border-bottom:2px solid grey;
+				border-top:2px solid grey;
+				display:none;
+			}
+			.header-item:hover{
+				color:darkgrey;
+			}
+			#header_logo{
+				background-image: url('assets/header_logo.png');
+				background-position:center;
+				background-size:contain;
+				background-repeat: no-repeat;
+				padding-left:37px;
+			}
+			#mandlebulbs{
+				width:100%;
+				position:relative;
+				top:12px;
+				display:none;
+				left:.5%;
+			}
+			.mandlebulb-item{
+				width:24.5%;
+			}
+			#about{
+				background-color:black;
+				width:100%;
+				height:100%;
+				position:absolute;
+				display:none;
+			}
+			#expRecapVideo{
+				position:relative;
+				top:30px;
+				left:5%;
+				width:90%;
+				height:80%;
+			}
+			#expRecapVideo:focus {
+				outline: none;
+			}
+			.mobile-mobile-dropdown{
+				display:none;
+			}
 		}
-		.header {
-			width:100%;
-			display: grid;
-			grid-template-columns: auto auto auto auto auto auto auto auto auto auto auto;
-			background-color: black;
-			padding: 0px;
-			height:60px;
-			z-index:10;
-			
-		}
-		.header-item {
-			color:white;
-			background-color: black;
-			padding: 20px;
-			font-size: 19px;
-			font-weight:bold;
-			text-align: center;
-			z-index:10;
-			border-bottom:2px solid grey;
-			border-top:2px solid grey;
-		}
-		.header-item:hover{
-			color:darkgrey;
-		}
-		#header_logo{
-			background-image: url('assets/header_logo.png');
-			background-position:center;
-			background-size:contain;
-			background-repeat: no-repeat;
-			padding-left:37px;
-		}
-		#mandlebulbs{
-			width:100%;
-			position:relative;
-			top:12px;
-			display:none;
-			left:.5%;
-		}
-		.mandlebulb-item{
-			width:24.5%;
-		}
-		#about{
-			background-color:black;
-			width:100%;
-			height:100%;
-			position:absolute;
-			display:none;
-		}
-		#expRecapVideo{
-			position:relative;
-			top:30px;
-			left:5%;
-			width:90%;
-			height:80%;
-		}
-		#expRecapVideo:focus {
-			outline: none;
+		@media only screen and (max-width:800px){
+			.mobile-dropdown{
+				width:100%;
+				display: grid;
+				grid-template-columns: auto;
+				background-color: black;
+				padding: 0px;
+				height:150px;
+				z-index:10;
+				display:none;
+				position:absolute;
+				top:60px;
+				left:0px;	
+			}
+			.mobile-dropdown-item{	
+				color:white;
+				background-color: black;
+				padding: 20px;
+				font-size: 19px;
+				font-weight:bold;
+				text-align: center;
+				z-index:10;
+				border-bottom:2px solid grey;
+				border-top:2px solid grey;
+				display:block;
+		    }
+			body{
+				margin:0px;
+				background-color:black;
+			}	
+			canvas{
+				opacity: 1;
+				width:100%;
+				height:100%;
+				top:0px;
+				left:0px;
+				z-index:0;
+				transform:scale(1,1);
+				position:fixed;
+				float:left;
+				object-fit:fill;
+				/* cursor: none; */
+			}
+			.header {
+				width:100%;
+				display: grid;
+				grid-template-columns: auto auto auto auto auto auto auto auto auto auto auto;
+				background-color: black;
+				padding: 0px;
+				height:60px;
+				z-index:10;
+				
+			}
+			.header-item {
+				color:white;
+				background-color: black;
+				padding: 20px;
+				font-size: 19px;
+				font-weight:bold;
+				text-align: center;
+				z-index:10;
+				border-bottom:2px solid grey;
+				border-top:2px solid grey;
+				display:none;
+			}
+			.mobile-header {
+				width:100%;
+				display: grid;
+				grid-template-columns: auto auto auto auto;
+				background-color: black;
+				padding: 0px;
+				height:60px;
+				z-index:10;
+				display:grid;
+				position:absolute;
+				top:0px;
+				left:0px;
+			}
+			.mobile-header-item {
+				color:white;
+				background-color: black;
+				padding: 20px;
+				font-size: 19px;
+				font-weight:bold;
+				text-align: center;
+				z-index:10;
+				border-bottom:2px solid grey;
+				border-top:2px solid grey;
+				display:block;
+			}
+			#mobile_header_logo{
+				background-image: url('assets/header_logo.png');
+				background-position:center;
+				background-size:contain;
+				background-repeat: no-repeat;
+				padding-left:10px;
+			}
+			#hamburger_icon{
+				background-image: url('assets/hamburger_icon.png');
+				background-position:center;
+				background-size:contain;
+				background-repeat: no-repeat;
+				padding-left:10px;
+			}
+			.header-item:hover{
+				color:darkgrey;
+			}
+			#header_logo{
+				background-image: url('assets/header_logo.png');
+				background-position:center;
+				background-size:contain;
+				background-repeat: no-repeat;
+				padding-left:37px;
+			}
+			#mandlebulbs{
+				width:100%;
+				position:relative;
+				top:12px;
+				display:none;
+				left:5%;
+			}
+			.mandlebulb-item{
+				width:90%;
+				margin-bottom: 10px;
+			}
+			#about{
+				background-color:black;
+				width:100%;
+				height:100%;
+				position:absolute;
+				display:none;
+			}
+			#expRecapVideo{
+				position:relative;
+				top:30px;
+				left:5%;
+				width:90%;
+				height:80%;
+			}
+			#expRecapVideo:focus {
+				outline: none;
+			}
 		}
 	</style>
 </head>
 	<body>
 
 		<div class="header">
-			<div class="header-item" id="header_logo"></div>
+			<div class="header-item" id="header_logo"  onclick="goToPage('home');"></div>
 			<div class="header-item"></div>
 			<div class="header-item"></div>  
 			<div class="header-item"></div>
 			<div class="header-item"></div>
 			<div class="header-item"></div>
 			<div class="header-item"></div>
-			<div class="header-item" onclick="goToPage('mandlebulbs');">Mandlebulbs</div>  
+			<div class="header-item" onclick="goToPage('mandlebulbs');">Mandlebulbs</div>
 			<div class="header-item" onclick="goToPage('ShaderMapper Demo');">ShaderMapper</div>
 			<div class="header-item" onclick="goToPage('FlowMapper Demo');">FlowMapper</div>
 			<div class="header-item" onclick="goToPage('about');">About Us</div>
+		</div>
+
+		<div class="mobile-header">
+			<div class="mobile-header-item" id="mobile_header_logo" onclick="goToPage('home');"></div>
+			<div class="mobile-header-item"></div>
+			<div class="mobile-header-item"></div>
+			<div class="mobile-header-item" id="hamburger_icon" onclick="hamburgerClick(document.getElementById('mobile-dropdown'))"></div>
+		</div>
+
+		<div class="mobile-dropdown" id="mobile-dropdown" >
+			<div class="mobile-dropdown-item" onclick="goToPage('mandlebulbs');">Mandlebulbs</div>
+			<div class="mobile-dropdown-item" onclick="goToPage('ShaderMapper Demo');">ShaderMapper</div>
+			<div class="mobile-dropdown-item" onclick="goToPage('FlowMapper Demo');">FlowMapper</div>
+			<div class="mobile-dropdown-item" onclick="goToPage('about');">About Us</div>
 		</div>
 
 		<div id="mandlebulbs"></div>
@@ -115,6 +299,7 @@
 			}
 
 			function goToPage(pageName){
+				document.getElementById('mobile-dropdown').style.display='none';
 				if(pageName=="mandlebulbs"){
 					if(!hasLoadedMandleBulbs){
 						loadMandlebulbs();
@@ -135,7 +320,10 @@
 					document.getElementById('renderCanvas').style.display="none";
 					document.getElementById('about').style.display="inline";
 				}
-				renderCanvas
+				if(pageName=="home"){
+					console.log("click")
+					window.location.href=window.location.href;
+				}
 			}
 
 			function loadMandlebulbs(){
@@ -192,6 +380,15 @@
 				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2050.mp4" type="video/mp4"></video> \
 				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2051.mp4" type="video/mp4"></video> \
 				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2052.mp4" type="video/mp4"></video> '
+			}
+		
+			function hamburgerClick(dropDownElem){
+				console.log("AA")
+				if(dropDownElem.style.display=='grid'){
+					dropDownElem.style.display='none'
+				}else{
+					dropDownElem.style.display='grid'
+				}
 			}
 		</script>
 
@@ -285,7 +482,7 @@
 			window.addEventListener( 'resize', onWindowResize, false );
 
 		}
-
+		
 		function onWindowResize() {
 
 			windowHalfX = window.innerWidth / 2;
