@@ -104,6 +104,13 @@
 			.mobile-mobile-dropdown{
 				display:none;
 			}
+			#mandlebulb_Page_Buttons{
+				margin-left:25px;
+			}
+			.mandlebulb_Page_Button{
+				margin-top:0px;
+				margin-bottom:35px;
+			}
 		}
 		@media only screen and (max-width:800px){
 			.mobile-dropdown{
@@ -250,6 +257,13 @@
 			#expRecapVideo:focus {
 				outline: none;
 			}
+			#mandlebulb_Page_Buttons{
+				margin-left:25px;
+			}
+			.mandlebulb_Page_Button{
+				margin-top:0px;
+				margin-bottom:35px;
+			}
 		}
 	</style>
 </head>
@@ -331,60 +345,33 @@
 
 			function loadMandlebulbs(){
 				document.getElementById('mandlebulbs').innerHTML='\
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%201.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%202.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%203.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%204.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%205.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%206.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%207.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%208.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%209.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2010.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2011.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2012.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2013.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2014.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2015.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2016.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2017.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2018.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2019.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2020.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2021.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2022.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2023.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2024.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2025.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2026.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2027.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2028.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2029.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2030.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2031.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2032.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2033.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2034.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2035.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2036.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2037.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2038.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2039.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2040.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2041.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2042.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2043.mp4#t=6.5" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2044.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2045.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2046.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2047.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2048.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2049.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2050.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2051.mp4" type="video/mp4"></video> \
-				<video width="320" height="180" controls="" class="mandlebulb-item"> <source src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2052.mp4" type="video/mp4"></video> '
+				<video width="320" height="180" controls="" class="mandlebulb-item"id="mp1" src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%201.mp4" type="video/mp4"></video> \
+				<video width="320" height="180" controls="" class="mandlebulb-item"id="mp2" src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%202.mp4" type="video/mp4"></video> \
+				<video width="320" height="180" controls="" class="mandlebulb-item"id="mp3" src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%203.mp4" type="video/mp4"></video> \
+				<video width="320" height="180" controls="" class="mandlebulb-item"id="mp4" src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%204.mp4" type="video/mp4"></video> \
+				<video width="320" height="180" controls="" class="mandlebulb-item"id="mp5" src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%205.mp4" type="video/mp4"></video> \
+				<video width="320" height="180" controls="" class="mandlebulb-item"id="mp6" src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%206.mp4" type="video/mp4"></video> \
+				<video width="320" height="180" controls="" class="mandlebulb-item"id="mp7" src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%207.mp4" type="video/mp4"></video> \
+				<video width="320" height="180" controls="" class="mandlebulb-item"id="mp8" src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%208.mp4" type="video/mp4"></video> \
+				<video width="320" height="180" controls="" class="mandlebulb-item"id="mp9" src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%209.mp4" type="video/mp4"></video> \
+				<video width="320" height="180" controls="" class="mandlebulb-item"id="mp10" src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2010.mp4" type="video/mp4"></video> \
+				<video width="320" height="180" controls="" class="mandlebulb-item"id="mp11" src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2011.mp4" type="video/mp4"></video> \
+				<video width="320" height="180" controls="" class="mandlebulb-item"id="mp12" src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%2012.mp4" type="video/mp4"></video> \
+				<div id="mandlebulb_Page_Buttons"> \
+					<span class="mandlebulb_Page_Button" style="color:white">Pages:</span> \
+					<button class="mandlebulb_Page_Button" onclick="loadManblebulbPage(parseInt(this.innerHTML))">1</button> \
+					<button class="mandlebulb_Page_Button" onclick="loadManblebulbPage(parseInt(this.innerHTML))">2</button> \
+					<button class="mandlebulb_Page_Button" onclick="loadManblebulbPage(parseInt(this.innerHTML))">3</button> \
+					<button class="mandlebulb_Page_Button" onclick="loadManblebulbPage(parseInt(this.innerHTML))">4</button> \
+				</div>'
 			}
 		
+			function loadManblebulbPage(mandlebulbPageNumber){
+				for(var x=1; x<13; x++){
+					document.getElementById("mp"+x).src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%20"+parseInt(x+(12*(mandlebulbPageNumber-1)))+".mp4"
+				}
+			}
+			
 			function hamburgerClick(dropDownElem){
 				console.log("AA")
 				if(dropDownElem.style.display=='grid'){
