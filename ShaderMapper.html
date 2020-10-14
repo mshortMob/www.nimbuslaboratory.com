@@ -367,9 +367,11 @@ void main()	{
 				renderer.sortObjects = true;
 				container.appendChild( renderer.domElement );
 				renderer.domElement.addEventListener( 'mousemove', onDocumentMouseMove, false );
-				renderer.domElement.addEventListener( 'touchmove', onDocumentMouseMove, false );
 				renderer.domElement.addEventListener( 'mousedown', onDocumentMouseDown, false );
 				renderer.domElement.addEventListener( 'mouseup', onDocumentMouseUp, false );
+				renderer.domElement.addEventListener( 'touchmove', onDocumentTouchMove, false );
+                renderer.domElement.addEventListener( 'touchstart', onDocumentTouchStart, false );
+                renderer.domElement.addEventListener( 'touchend', onDocumentTouchEnd, false );
 				window.addEventListener( 'resize', onWindowResize, false );
 				tempElem=document.body.getElementsByClassName('ac')[0];
 				tempElem.className="";
@@ -660,7 +662,7 @@ void main()	{
 					//var  geo = new THREE.BoxGeometry( 35, 35, 0 );
 					//var mat = new THREE.PointsMaterial( { size: 300, vertexColors: THREE.VertexColors , color: 0xffffff } );
 					//var mesh1 = new THREE.Mesh( geo, mat );
-					mesh1 = new THREE.Mesh( new THREE.CircleGeometry(20, 20, 0, Math.PI * 2 ), new THREE.MeshPhongMaterial({side: THREE.DoubleSide, color:0xffffff}))
+					mesh1 = new THREE.Mesh( new THREE.CircleGeometry(45, 45, 0, Math.PI * 2 ), new THREE.MeshPhongMaterial({side: THREE.DoubleSide, color:0xffffff}))
 					mesh1.name="vertice"+x;
 					mesh1.isCorner=false;
 					if (x == 0 || x == 4 || x == 24 || x == 20) {
@@ -770,6 +772,89 @@ void main()	{
 				camera.bottom = - frustumSize / 2;
 				camera.updateProjectionMatrix();
 				renderer.setSize( window.innerWidth, window.innerHeight );
+			}
+			
+			function onDocumentTouchMove(event){
+				if (SELECTED) {
+					if (SELECTED.isCorner==true && globalController.mappingMode<.5) {
+						console.log(SELECTED)
+						SELECTED.parent.updateCorners();
+					}
+				}
+                mouse.x = ( event.touches[0].clientX / window.innerWidth ) * 2.0 - 1.0;
+                mouse.y = - ( event.touches[0].clientY / window.innerHeight ) * 2.0 + 1.0;
+
+				uniforms1.mousey={ value: mouse.y };
+				uniforms2.mousey={ value: mouse.y };
+				uniforms1.mousex={ value: mouse.x };
+				uniforms2.mousex={ value: mouse.x };
+				raycaster.setFromCamera( mouse, camera );
+				if ( SELECTED ) {
+					
+					if ( raycaster.ray.intersectPlane( plane, intersection ) ) {
+						if (SELECTED.name.indexOf('vertice') != -1 && SELECTED.name.indexOf('corner') == -1) {
+						    console.log(SELECTED.name)
+							SELECTED.position.copy(intersection.sub( offset ));
+							SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].x=SELECTED.position.x;
+							SELECTED.parent.geometry.vertices[SELECTED.name.substring(SELECTED.name.indexOf("ce")+2,SELECTED.name.length)].y=SELECTED.position.y;
+							SELECTED.parent.geometry.verticesNeedUpdate = true;
+							statesArray[parseInt(globalController.selectedObject)]["VerticeX"+SELECTED.vertNum]=SELECTED.position.x;						
+							statesArray[parseInt(globalController.selectedObject)]["VerticeY"+SELECTED.vertNum]=SELECTED.position.y;			
+						}
+					}
+					return;
+				}
+				var intersects = raycaster.intersectObjects( objects);
+				if ( intersects.length > 0 ) {
+					if ( INTERSECTED != intersects[ 0 ].object ) {
+						INTERSECTED = intersects[ 0 ].object;
+						plane.setFromNormalAndCoplanarPoint(
+							camera.getWorldDirection( plane.normal ),
+							INTERSECTED.position );
+					}
+					container.style.cursor = 'pointer';
+				} else {
+					INTERSECTED = null;
+					container.style.cursor = 'auto';
+				}
+			}
+
+			function onDocumentTouchStart(event){
+				mouse.x = ( event.touches[0].clientX / window.innerWidth ) * 2.0 - 1.0;
+                mouse.y = - ( event.touches[0].clientY / window.innerHeight ) * 2.0 + 1.0;
+				requestFullScreen();
+                raycaster.setFromCamera( mouse, camera );
+				intersects = raycaster.intersectObjects( objects);
+				if ( intersects.length > 0 ) {
+					SELECTED = intersects[ 0 ].object;
+					if ( raycaster.ray.intersectPlane( plane, intersection ) ) {
+						offset.copy( intersection ).sub( SELECTED.position );
+					}
+					container.style.cursor = 'move';
+				}
+				if (SELECTED) {
+					if (SELECTED.isCorner==true && globalController.mappingMode<.5) {
+						// console.log(SELECTED)
+						SELECTED.parent.updateCorners();
+
+						var listOfCornerVertices=[4,0,20,24];
+						selectedVertice=listOfCornerVertices.indexOf(SELECTED.vertNum);
+						// console.log("Selected Vertice:"+selectedVertice);
+						highlightSelectedVertice();
+					}
+				}
+			}
+
+            function onDocumentTouchEnd(event){
+				SELECTED = null;
+				//event.preventDefault();
+				if (SELECTED) {
+					if (SELECTED.isCorner==true && globalController.mappingMode<.5) {
+						SELECTED.parent.updateCorners();
+					}
+				}
+				
+				container.style.cursor = 'auto';
 			}
 			
 			function onDocumentMouseMove( event ) {
