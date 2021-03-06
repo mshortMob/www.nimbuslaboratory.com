@@ -112,6 +112,10 @@
 			let INTERSECTED;
 			const tempMatrix = new THREE.Matrix4();
 
+			var triggerTime=new Date().getTime();
+
+			var alphaIndex=1;
+
 			init();
 			animate();
 
@@ -153,9 +157,7 @@
 					object.rotation.y = Math.random() * 2 * Math.PI;
 					object.rotation.z = Math.random() * 2 * Math.PI;
 
-					// object.scale.x = Math.random() + 0.5;
-					// object.scale.y = Math.random() + 0.5;
-					// object.scale.z = Math.random() + 0.5;
+					object.scale.set(.05,.05,.05);
 
 					object.userData.velocity = new THREE.Vector3();
 					object.userData.velocity.x = Math.random() * 0.01 - 0.005;
@@ -261,12 +263,22 @@
 
 			}
 
+			function setOpacity( obj, opacity ) {
+				obj.children.forEach((child)=>{
+					setOpacity( child, opacity );
+				});
+				if ( obj.material ) {
+					obj.material.opacity = opacity ;
+				};
+			};
+					
 			function render() {
-
 				const delta = clock.getDelta() * 60;
-
+				var currentTime=new Date().getTime();
 				if ( controller.userData.isSelecting === true ) {
-
+					alphaIndex=1;
+					triggerTime=new Date().getTime();
+					
 					const cube = room.children[ 0 ];
 					room.remove( cube );
 
@@ -275,11 +287,35 @@
 					cube.userData.velocity.y = ( Math.random() - 0.5 ) * 0.02 * delta;
 					cube.userData.velocity.z = ( Math.random() * 0.01 - 0.05 ) * delta;
 					cube.userData.velocity.applyQuaternion( controller.quaternion );
+					cube.scale.set(.05,.05,.05);
 					room.add( cube );
+					setOpacity( cube, 1.0 );
 
+				}else{
+					// cube.scale.x+=.05;
+					// cube.scale.y+=.05;
+					// cube.scale.z+=.05;
+					for(var x=0; x<4; x++){
+						var cube = room.children[ x ];
+						var a=1000;
+						var b=1005;
+						var c=10000;
+						var burstSpeed=.17;
+						var fadeSpeed=0.04;
+						if( Math.abs(currentTime-triggerTime) > a &&  Math.abs(currentTime-triggerTime) <= b ){
+							cube.scale.x+=burstSpeed;
+							cube.scale.y+=burstSpeed;
+							cube.scale.z+=burstSpeed;
+						}
+						if( Math.abs(currentTime-triggerTime) > b &&  Math.abs(currentTime-triggerTime) <= c ){
+							cube.scale.x+=.1;
+							cube.scale.y+=.1;
+							cube.scale.z+=.1;
+							alphaIndex-=fadeSpeed;
+							setOpacity( cube, alphaIndex );
+						}
+					}
 				}
-
-				// find intersections
 
 				tempMatrix.identity().extractRotation( controller.matrixWorld );
 
@@ -347,8 +383,8 @@
 
 				const time = Date.now() / 1000;
 
-				group.rotation.x = time * 0.5;
-				group.rotation.y = time * 0.25;
+				group.rotation.x = time * 0.01;
+				group.rotation.y = time * 0.005;
                 // group.scale.set(time/2%3,time/2%3,time/2%3);
 				// group.rotation.z = time * 1.0;
 
@@ -357,7 +393,7 @@
 			}
 
             function createSpriteSphere(){
-                const amount = 9;
+                const amount = 8;
 				const radius = .5;
 
 
@@ -393,7 +429,7 @@
                 console.log(gList);
 
 				group = new THREE.Group();
-                var spriteTexture=new THREE.TextureLoader().load( "sprites/sprite3.png" );
+                var spriteTexture=new THREE.TextureLoader().load( "sprites/sprite2.png" );
 				for ( let a = 0; a < amount*amount*amount; a ++ ) {                    var material = new THREE.SpriteMaterial( { map: spriteTexture, color: rgbToHex(rList[a],gList[a],bList[a]), fog: true, blending: THREE.AdditiveBlending, depthTest: false, transparent: true } );
 
 					const x = xList[a];
