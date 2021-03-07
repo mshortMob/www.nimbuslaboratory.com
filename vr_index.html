@@ -305,8 +305,8 @@
 
 				for(var x=0; x<8; x++){
 					var cube = room.children[ x ];
-					var a=1000;
-					var b=1005;
+					var a=2000;
+					var b=2005;
 					var c=10000;
 					var burstSpeed=.27;
 					var fadeSpeed=0.04;
@@ -401,7 +401,7 @@
 			}
 
             function createSpriteSphere(){
-                const amount = 6;
+                const amount = 5;
 				const radius = .5;
 
 
@@ -437,8 +437,12 @@
                 // console.log(gList);
 
 				group = new THREE.Group();
-                var spriteTexture=new THREE.TextureLoader().load( "sprites/sprite3.png" );
-				for ( let a = 0; a < amount*amount*amount; a ++ ) {                    var material = new THREE.SpriteMaterial( { map: spriteTexture, color: rgbToHex(rList[a],gList[a],bList[a]), fog: true, blending: THREE.AdditiveBlending, depthTest: false, transparent: true } );
+                var spriteTexture1=new THREE.TextureLoader().load( "sprites/sprite1.png" );
+				var spriteTexture2=new THREE.TextureLoader().load( "sprites/sprite2.png" );
+				var spriteTexture3=new THREE.TextureLoader().load( "sprites/sprite3.png" );
+				var spriteTextures=[spriteTexture1, spriteTexture2, spriteTexture3];
+				for ( let a = 0; a < amount*amount*amount; a ++ ) {                    
+					var material = new THREE.SpriteMaterial( { map: spriteTextures[a%3], color: rgbToHex(rList[a],gList[a],bList[a]), fog: true, blending: THREE.AdditiveBlending, depthTest: false, transparent: true } );
 
 					const x = xList[a];
 					const y = yList[a];
