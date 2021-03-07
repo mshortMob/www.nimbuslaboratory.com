@@ -112,14 +112,16 @@
 			let INTERSECTED;
 			const tempMatrix = new THREE.Matrix4();
 
+			var sPressed=false;
 			var triggerTime=new Date().getTime();
-
-			var alphaIndex=1;
 
 			init();
 			animate();
 
 			function init() {
+
+				window.addEventListener("keypress", keyHandler);
+				window.addEventListener("keyup", keyHandler);
 
 				container = document.createElement( 'div' );
 				document.body.appendChild( container );
@@ -272,14 +274,23 @@
 				};
 			};
 					
+			function keyHandler(event){
+				if(event.key=="s" && event.type=="keypress"){
+					sPressed=true;
+				}
+				if(event.key=="s" && event.type=="keyup"){
+					sPressed=false;
+				}
+				console.log("sPressed: "+sPressed);
+			}
+			
 			function render() {
 				const delta = clock.getDelta() * 60;
 				var currentTime=new Date().getTime();
-				if ( controller.userData.isSelecting === true ) {
-					alphaIndex=1;
-					triggerTime=new Date().getTime();
-					
+				if ( controller.userData.isSelecting === true || sPressed==true) {
 					const cube = room.children[ 0 ];
+					cube.triggerTime=new Date().getTime();
+					cube.alphaIndex=1;
 					room.remove( cube );
 
 					cube.position.copy( controller.position );
@@ -290,32 +301,29 @@
 					cube.scale.set(.05,.05,.05);
 					room.add( cube );
 					setOpacity( cube, 1.0 );
+				}
 
-				}else{
-					// cube.scale.x+=.05;
-					// cube.scale.y+=.05;
-					// cube.scale.z+=.05;
-					for(var x=0; x<4; x++){
-						var cube = room.children[ x ];
-						var a=1000;
-						var b=1005;
-						var c=10000;
-						var burstSpeed=.17;
-						var fadeSpeed=0.04;
-						if( Math.abs(currentTime-triggerTime) > a &&  Math.abs(currentTime-triggerTime) <= b ){
-							cube.scale.x+=burstSpeed;
-							cube.scale.y+=burstSpeed;
-							cube.scale.z+=burstSpeed;
-						}
-						if( Math.abs(currentTime-triggerTime) > b &&  Math.abs(currentTime-triggerTime) <= c ){
-							cube.scale.x+=.1;
-							cube.scale.y+=.1;
-							cube.scale.z+=.1;
-							alphaIndex-=fadeSpeed;
-							setOpacity( cube, alphaIndex );
-						}
+				for(var x=0; x<4; x++){
+					var cube = room.children[ x ];
+					var a=1000;
+					var b=1005;
+					var c=10000;
+					var burstSpeed=.27;
+					var fadeSpeed=0.04;
+					if( Math.abs(currentTime-cube.triggerTime) > a &&  Math.abs(currentTime-cube.triggerTime) <= b ){
+						cube.scale.x+=burstSpeed;
+						cube.scale.y+=burstSpeed;
+						cube.scale.z+=burstSpeed;
+					}
+					if( Math.abs(currentTime-cube.triggerTime) > b &&  Math.abs(currentTime-cube.triggerTime) <= c ){
+						cube.scale.x+=.1;
+						cube.scale.y+=.1;
+						cube.scale.z+=.1;
+						cube.alphaIndex-=fadeSpeed;
+						setOpacity( cube, cube.alphaIndex );
 					}
 				}
+				
 
 				tempMatrix.identity().extractRotation( controller.matrixWorld );
 
@@ -426,10 +434,10 @@
                         }
                     }
                 }
-                console.log(gList);
+                // console.log(gList);
 
 				group = new THREE.Group();
-                var spriteTexture=new THREE.TextureLoader().load( "sprites/sprite2.png" );
+                var spriteTexture=new THREE.TextureLoader().load( "sprites/sprite3.png" );
 				for ( let a = 0; a < amount*amount*amount; a ++ ) {                    var material = new THREE.SpriteMaterial( { map: spriteTexture, color: rgbToHex(rList[a],gList[a],bList[a]), fog: true, blending: THREE.AdditiveBlending, depthTest: false, transparent: true } );
 
 					const x = xList[a];
@@ -440,9 +448,11 @@
 					sprite.position.set( x,y,z );
 					sprite.position.normalize();
 					sprite.position.multiplyScalar( radius );
-                    sprite.scale.set( .1, .1, .1 );
+                    sprite.scale.set( .2, .2, .2 );
 					group.position.y=2;
 					group.position.z=-1;
+					group.triggerTime=new Date().getTime();
+					group.alpha=1;
 					group.add( sprite );
 				}
 				return group;
