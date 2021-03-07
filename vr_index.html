@@ -147,7 +147,7 @@
 
 				const geometry = new THREE.BoxGeometry( 0.15, 0.15, 0.15 );
 
-				for ( let i = 0; i < 4; i ++ ) {
+				for ( let i = 0; i < 8; i ++ ) {
 
 					var object=createSpriteSphere();
 
@@ -303,7 +303,7 @@
 					setOpacity( cube, 1.0 );
 				}
 
-				for(var x=0; x<4; x++){
+				for(var x=0; x<8; x++){
 					var cube = room.children[ x ];
 					var a=1000;
 					var b=1005;
@@ -401,7 +401,7 @@
 			}
 
             function createSpriteSphere(){
-                const amount = 8;
+                const amount = 6;
 				const radius = .5;
 
 
