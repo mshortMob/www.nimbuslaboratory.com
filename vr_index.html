@@ -112,6 +112,8 @@
 			let INTERSECTED;
 			const tempMatrix = new THREE.Matrix4();
 
+			var numGroups = 30;
+			const amount = 4;
 			var sPressed=false;
 			var triggerTime=new Date().getTime();
 
@@ -147,7 +149,7 @@
 
 				const geometry = new THREE.BoxGeometry( 0.15, 0.15, 0.15 );
 
-				for ( let i = 0; i < 8; i ++ ) {
+				for ( let i = 0; i < numGroups; i ++ ) {
 
 					var object=createSpriteSphere();
 
@@ -303,10 +305,10 @@
 					setOpacity( cube, 1.0 );
 				}
 
-				for(var x=0; x<8; x++){
+				for(var x=0; x<numGroups; x++){
 					var cube = room.children[ x ];
-					var a=2000;
-					var b=2005;
+					var a=1000;
+					var b=1005;
 					var c=10000;
 					var burstSpeed=.27;
 					var fadeSpeed=0.04;
@@ -401,7 +403,6 @@
 			}
 
             function createSpriteSphere(){
-                const amount = 5;
 				const radius = .5;
 
 
