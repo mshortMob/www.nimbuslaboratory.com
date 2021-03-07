@@ -112,8 +112,13 @@
 			let INTERSECTED;
 			const tempMatrix = new THREE.Matrix4();
 
-			var numGroups = 30;
-			const amount = 4;
+			var amount = 4;
+			if(window.location.href.indexOf("localhost")!=-1){
+				var numGroups = 4;
+			}else{
+				var numGroups = 30;
+			}
+			
 			var sPressed=false;
 			var triggerTime=new Date().getTime();
 
@@ -322,6 +327,7 @@
 						cube.scale.y+=.1;
 						cube.scale.z+=.1;
 						cube.alphaIndex-=fadeSpeed;
+						cube.userData.velocity.set(cube.userData.velocity.x/1.125,cube.userData.velocity.y/1.125,cube.userData.velocity.z/1.125);
 						setOpacity( cube, cube.alphaIndex );
 					}
 				}
