@@ -108,7 +108,7 @@
 			let room;
 			let group;
 
-			let controller, controller2, controllerGrip;
+			let controller, controller2, controllerGrip, controllerGrip2;
 			var c2select=false;
 			var c2squeeze=false;
 
@@ -242,6 +242,9 @@
 				controllerGrip = renderer.xr.getControllerGrip( 0 );
 				controllerGrip.add( controllerModelFactory.createControllerModel( controllerGrip ) );
 				scene.add( controllerGrip );
+				controllerGrip = renderer.xr.getControllerGrip( 1 );
+				controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
+				scene.add( controllerGrip2 );
 
 				window.addEventListener( 'resize', onWindowResize );
 
