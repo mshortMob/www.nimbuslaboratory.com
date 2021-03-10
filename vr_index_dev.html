@@ -442,29 +442,44 @@
 				// group.rotation.z = time * 1.0;
 
 				if(c2select){
-					scene.add(drawPoint());
+					scene.add(drawPoint(delta));
 				}
 				if(c2squeeze){
-					for(var x=0; x<scene.children.length; x++){
-						if(scene.children[x].idType=="p1"){
-							scene.remove(scene.children[x]);
-						}
+
+				}
+				for(var x=0; x<scene.children.length; x++){
+					if(scene.children[x].idType=="p1"){
+						var temp=scene.children[x]
+						scene.children[x].position.x+=scene.children[x].velocity.x;
+						scene.children[x].position.y+=scene.children[x].velocity.y;
+						scene.children[x].position.z+=scene.children[x].velocity.z;
+					}
+					if( Math.abs(currentTime-scene.children[x].createdTime) > 2000){
+						scene.remove(temp);
 					}
 				}
+
 
 				renderer.render( scene, camera );
 
 			}
 
-			function drawPoint(){
-				var geometry = new THREE.SphereGeometry( .025, 44, 44 );
+			function drawPoint(delta){
+				var geometry = new THREE.SphereGeometry( .1, 44, 44 );
 				var temp=new Date().getTime()%5000
 				temp=temp/5000*255;
 				var material = new THREE.MeshBasicMaterial( {color: rgbToHex(temp,0,255-temp) } );
 				var sphere = new THREE.Mesh( geometry, material );
 				sphere.idType="p1"
+				sphere.velocity= new THREE.Vector3();
+				sphere.velocity.x = ( 1.0 - 0.5 ) * 0.02 * delta *3.8;
+				sphere.velocity.y = ( 1.0 - 0.5 ) * 0.02 * delta *3.8;
+				sphere.velocity.z = ( 1.0 * 0.01 - 0.05 ) * delta *3.8;
+				sphere.velocity.applyQuaternion (controller2.quaternion);
 				sphere.position.copy( controller2.position );
+				sphere.createdTime=new Date().getTime();
 				scene.add( sphere );
+				console.log(scene.children.length)
 			}
 
 			function rgbToHex(r, g, b) {
