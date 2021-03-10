@@ -138,17 +138,30 @@
 
 				scene = new THREE.Scene();
 
-				const planeGeometry = new THREE.PlaneGeometry( 5, 5, 32 );
-				const planeMaterial = new THREE.MeshBasicMaterial( {color: 0x333333, side: THREE.DoubleSide} );
-				const plane = new THREE.Mesh( planeGeometry, planeMaterial );
-				plane.rotation.x=Math.PI/2;
-				scene.add( plane );
+				// const planeGeometry = new THREE.PlaneGeometry( 5, 5, 32 );
+				// const planeMaterial = new THREE.MeshBasicMaterial( {color: 0x333333, side: THREE.DoubleSide} );
+				// const plane = new THREE.Mesh( planeGeometry, planeMaterial );
+				// plane.rotation.x=Math.PI/2;
+				// scene.add( plane );
+				var radius = 3;
+				var radialSegments = 32;
+				var hsmaterial = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/dark-s_ny.jpg' ) });
+				var hemiSphereGeom = new THREE.SphereBufferGeometry(radius, radialSegments, Math.round(radialSegments / 4), 0, Math.PI * 2, 0, Math.PI * 0.5);
+				var hemiSphere = new THREE.Mesh(hemiSphereGeom, hsmaterial);
+				var capGeom = new THREE.CircleBufferGeometry(radius, radialSegments);
+				capGeom.rotateX(Math.PI * 0.5);
+				var hfmaterial=new THREE.MeshPhongMaterial({side: THREE.DoubleSide, color:0x111111 });
+				var cap = new THREE.Mesh(capGeom, hfmaterial);
+				hemiSphere.add(cap);
+				hemiSphere.position.y=1;
+				scene.add(hemiSphere);
+
 
 				// scene.background = new THREE.Color( 0x000000 );
 				const background = new THREE.CubeTextureLoader()
 					.setPath( 'assets/' )
 					.load( [ 'dark-s_px.jpg', 'dark-s_nx.jpg', 'dark-s_py.jpg', 'dark-s_ny.jpg', 'dark-s_pz.jpg', 'dark-s_nz.jpg' ] );
-				scene.background = background;
+				// scene.background = background;
 
 				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 10 );
 				camera.position.set( 0, 1.6, 3);
