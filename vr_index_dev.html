@@ -450,18 +450,16 @@
 			}
 
 			function drawPoint(){
-				const geometry = new THREE.SphereGeometry( .05, 44, 44 );
-				const material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+				const geometry = new THREE.SphereGeometry( .025, 44, 44 );
+				var temp=new Date().getTime()%5000
+				temp=temp/5000*255;
+				const material = new THREE.MeshBasicMaterial( {color: rgbToHex(temp,0,255-temp) } );
 				const sphere = new THREE.Mesh( geometry, material );
 				sphere.position.copy( controller2.position );
 				scene.add( sphere );
 			}
 
-            function createSpriteSphere(){
-				const radius = .5;
-
-
-                function rgbToHex(r, g, b) {
+			function rgbToHex(r, g, b) {
                     r=parseInt(r);
                     g=parseInt(g);
                     b=parseInt(b);
@@ -470,7 +468,11 @@
                         return hex.length == 1 ? "0" + hex : hex;
                     }
                     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
-                }
+            }
+
+
+            function createSpriteSphere(){
+				const radius = .5;
 
                 var xList=[];
                 var yList=[];
