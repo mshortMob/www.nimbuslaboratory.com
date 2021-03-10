@@ -450,7 +450,7 @@
 			}
 
 			function drawPoint(){
-				const geometry = new THREE.SphereGeometry( .5, .5, 60 );
+				const geometry = new THREE.SphereGeometry( .05, .05, 60 );
 				const material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
 				const sphere = new THREE.Mesh( geometry, material );
 				sphere.position.copy( controller2.position );
