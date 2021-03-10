@@ -143,7 +143,7 @@
 				// const plane = new THREE.Mesh( planeGeometry, planeMaterial );
 				// plane.rotation.x=Math.PI/2;
 				// scene.add( plane );
-				var radius = 7;
+				var radius = 60;
 				var radialSegments = 32;
 				var hsmaterial = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/dark-s_ny.jpg' ), opacity: .34, transparent:true });
 				var hemiSphereGeom = new THREE.SphereBufferGeometry(radius, radialSegments, Math.round(radialSegments / 4), 0, Math.PI * 2, 0, Math.PI * 0.5);
@@ -163,7 +163,7 @@
 					.load( [ 'dark-s_px.jpg', 'dark-s_nx.jpg', 'dark-s_py.jpg', 'dark-s_ny.jpg', 'dark-s_pz.jpg', 'dark-s_nz.jpg' ] );
 				// scene.background = background;
 
-				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 10 );
+				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 100 );
 				camera.position.set( 0, 1.6, 3);
 				scene.add( camera );
 
