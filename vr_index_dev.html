@@ -145,12 +145,12 @@
 				// scene.add( plane );
 				var radius = 60;
 				var radialSegments = 32;
-				var hsmaterial = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/stars3.jpg' ), emissiveMap: new THREE.TextureLoader().load( 'assets/stars1.jpg' ), emissive: 0x000000, emissiveIntensity: 1.0, opacity: .34, transparent:true });
+				var hsmaterial = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/stars3.jpg' ), opacity: .34, transparent:true });
 				var hemiSphereGeom = new THREE.SphereBufferGeometry(radius, radialSegments, Math.round(radialSegments / 4), 0, Math.PI * 2, 0, Math.PI * 0.5);
 				var hemiSphere = new THREE.Mesh(hemiSphereGeom, hsmaterial);
 				var capGeom = new THREE.CircleBufferGeometry(radius, radialSegments);
 				capGeom.rotateX(Math.PI * 0.5);
-				var hfmaterial = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/grass-texture-1.jpg' ), opacity: .15, transparent:true });
+				var hfmaterial = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/grass2.jpg' ), opacity: .15, transparent:true });
 				var cap = new THREE.Mesh(capGeom, hfmaterial);
 				hemiSphere.add(cap);
 				hemiSphere.position.y=0;
@@ -477,7 +477,6 @@
                     }
                     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
             }
-
 
             function createSpriteSphere(){
 				const radius = .5;
