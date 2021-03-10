@@ -150,7 +150,7 @@
 				var hemiSphere = new THREE.Mesh(hemiSphereGeom, hsmaterial);
 				var capGeom = new THREE.CircleBufferGeometry(radius, radialSegments);
 				capGeom.rotateX(Math.PI * 0.5);
-				var hfmaterial = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/grass-texture-1.jpg' ), opacity: .2, transparent:true });
+				var hfmaterial = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/grass-texture-1.jpg' ), opacity: .15, transparent:true });
 				var cap = new THREE.Mesh(capGeom, hfmaterial);
 				hemiSphere.add(cap);
 				hemiSphere.position.y=0;
