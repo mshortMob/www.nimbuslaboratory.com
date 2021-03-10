@@ -444,17 +444,25 @@
 				if(c2select){
 					scene.add(drawPoint());
 				}
+				if(c2squeeze){
+					for(var x=0; x<scene.children.length; x++){
+						if(scene.children[x].idType=="p1"){
+							scene.remove(scene.children[x]);
+						}
+					}
+				}
 
 				renderer.render( scene, camera );
 
 			}
 
 			function drawPoint(){
-				const geometry = new THREE.SphereGeometry( .025, 44, 44 );
+				var geometry = new THREE.SphereGeometry( .025, 44, 44 );
 				var temp=new Date().getTime()%5000
 				temp=temp/5000*255;
-				const material = new THREE.MeshBasicMaterial( {color: rgbToHex(temp,0,255-temp) } );
-				const sphere = new THREE.Mesh( geometry, material );
+				var material = new THREE.MeshBasicMaterial( {color: rgbToHex(temp,0,255-temp) } );
+				var sphere = new THREE.Mesh( geometry, material );
+				sphere.idType="p1"
 				sphere.position.copy( controller2.position );
 				scene.add( sphere );
 			}
