@@ -145,7 +145,7 @@
 				// scene.add( plane );
 				var radius = 60;
 				var radialSegments = 32;
-				var hsmaterial = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/stars1.jpg' ), emissiveMap: new THREE.TextureLoader().load( 'assets/stars1.jpg' ), emissive: 0x000000, emissiveIntensity: 1.0, opacity: .34, transparent:true });
+				var hsmaterial = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/stars3.jpg' ), emissiveMap: new THREE.TextureLoader().load( 'assets/stars1.jpg' ), emissive: 0x000000, emissiveIntensity: 1.0, opacity: .34, transparent:true });
 				var hemiSphereGeom = new THREE.SphereBufferGeometry(radius, radialSegments, Math.round(radialSegments / 4), 0, Math.PI * 2, 0, Math.PI * 0.5);
 				var hemiSphere = new THREE.Mesh(hemiSphereGeom, hsmaterial);
 				var capGeom = new THREE.CircleBufferGeometry(radius, radialSegments);
