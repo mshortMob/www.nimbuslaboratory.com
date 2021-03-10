@@ -143,7 +143,7 @@
 				// const plane = new THREE.Mesh( planeGeometry, planeMaterial );
 				// plane.rotation.x=Math.PI/2;
 				// scene.add( plane );
-				var radius = 12;
+				var radius = 7;
 				var radialSegments = 32;
 				var hsmaterial = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/dark-s_ny.jpg' ), opacity: .34, transparent:true });
 				var hemiSphereGeom = new THREE.SphereBufferGeometry(radius, radialSegments, Math.round(radialSegments / 4), 0, Math.PI * 2, 0, Math.PI * 0.5);
