@@ -153,12 +153,12 @@
 				capGeom.rotateX(Math.PI * 0.5);
 				var hfmaterial = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/grass2.jpg' ), opacity: .125, transparent:true });
 				hfmaterial.map.offset.set( 0, 0 );
-				hfmaterial.map.repeat.set( 8, 8 );
+				hfmaterial.map.repeat.set( 16, 16 );
 				hfmaterial.map.wrapS=THREE.MirroredRepeatWrapping;
 				hfmaterial.map.wrapT=THREE.MirroredRepeatWrapping;
 				var cap = new THREE.Mesh(capGeom, hfmaterial);
 				hemiSphere.add(cap);
-				hemiSphere.position.y=-1.50;
+				hemiSphere.position.y=-1.0;
 				scene.add(hemiSphere);
 
 
@@ -424,7 +424,7 @@
 					// }
 
 					// if ( cube.position.y < 0 || cube.position.y > 6 ) {
-					if ( cube.position.y < -1.5) {
+					if ( cube.position.y < -1.) {
 						cube.position.y = THREE.MathUtils.clamp( cube.position.y, 0, 6 );
 						cube.userData.velocity.y = - cube.userData.velocity.y;
 					}
