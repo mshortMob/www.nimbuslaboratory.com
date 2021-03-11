@@ -496,14 +496,14 @@
 					sphere.velocity.applyQuaternion (controller2.quaternion);
 				}
 				if(distance=="short"){
-					sphere.velocity.x += (Math.random() - 0.5)*.04 ;
-					sphere.velocity.y += (Math.random() - 0.5)*.04 ;
-					sphere.velocity.z += (Math.random() - 0.5)*.04 ;
+					sphere.velocity.x += (Math.random() - 0.5)*.15 ;
+					sphere.velocity.y += (Math.random() - 0.5)*.15 ;
+					sphere.velocity.z += (Math.random() - 0.5)*.15 ;
 				}
 				if(distance=="long"){
-					sphere.velocity.x += (Math.random() - 0.5)*.04 ;
-					sphere.velocity.y += (Math.random() - 0.5)*.04;
-					sphere.velocity.z += ((Math.random() - 0.5)*.04)-.11 ;
+					sphere.velocity.x += (Math.random() - 0.5)*.15 ;
+					sphere.velocity.y += (Math.random() - 0.5)*.15;
+					sphere.velocity.z += ((Math.random() - 0.5)*.15)-.25 ;
 				}
 				sphere.createdTime=new Date().getTime();
 				sphere.userData.aplha=1.;
