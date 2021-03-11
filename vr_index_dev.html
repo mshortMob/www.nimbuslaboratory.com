@@ -494,14 +494,14 @@
 					sphere.velocity.set(0.0, 0.05, -.05)
 				}else{
 					if(distance=="short"){
-						sphere.velocity.x += (Math.random() - 0.5)*.15 ;
-						sphere.velocity.y += (Math.random() - 0.5)*.15 ;
-						sphere.velocity.z += (Math.random() - 0.5)*.15 ;
+						sphere.velocity.x += (Math.random() - 0.5)*.04 ;
+						sphere.velocity.y += (Math.random() - 0.5)*.04 ;
+						sphere.velocity.z += (Math.random() - 0.5)*.04 ;
 					}
 					if(distance=="long"){
-						sphere.velocity.x += (Math.random() - 0.5)*.15 ;
-						sphere.velocity.y += (Math.random() - 0.5)*.15;
-						sphere.velocity.z += ((Math.random() - 0.5)*.15)-.25 ;
+						sphere.velocity.x += (Math.random() - 0.5)*.04 ;
+						sphere.velocity.y += (Math.random() - 0.5)*.04 ;
+						sphere.velocity.z += (Math.random() - 0.5)*.04 ;
 					}
 					sphere.velocity.applyQuaternion (controller2.quaternion);
 				}
