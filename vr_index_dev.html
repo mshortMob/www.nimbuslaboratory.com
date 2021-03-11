@@ -151,7 +151,7 @@
 				var hemiSphere = new THREE.Mesh(hemiSphereGeom, hsmaterial);
 				var capGeom = new THREE.CircleBufferGeometry(radius, radialSegments);
 				capGeom.rotateX(Math.PI * 0.5);
-				var hfmaterial = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/grass2.jpg' ), opacity: .15, transparent:true });
+				var hfmaterial = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/grass2.jpg' ), opacity: .125, transparent:true });
 				hfmaterial.map.offset.set( 0, 0 );
 				hfmaterial.map.repeat.set( 8, 8 );
 				hfmaterial.map.wrapS=THREE.MirroredRepeatWrapping;
@@ -330,7 +330,10 @@
 					sPressed=false;
 				}
 				if(event.key=="d"){
-					drawPoint();
+					drawPoint(null, "short");
+				}
+				if(event.key=="f"){
+					drawPoint(null, "long");
 				}
 			}
 			
@@ -421,7 +424,7 @@
 					// }
 
 					// if ( cube.position.y < 0 || cube.position.y > 6 ) {
-					if ( cube.position.y < 0) {
+					if ( cube.position.y < -1.5) {
 						cube.position.y = THREE.MathUtils.clamp( cube.position.y, 0, 6 );
 						cube.userData.velocity.y = - cube.userData.velocity.y;
 					}
@@ -447,10 +450,10 @@
 				// group.rotation.z = time * 1.0;
 
 				if(c2select){
-					scene.add(drawPoint(delta));
+					scene.add(drawPoint(delta,"short"));
 				}
 				if(c2squeeze){
-
+					scene.add(drawPoint(delta,"long"));
 				}
 				for(var x=0; x<scene.children.length; x++){
 					if(scene.children[x].idType=="p1"){
@@ -459,13 +462,17 @@
 						scene.children[x].position.y+=scene.children[x].velocity.y;
 						scene.children[x].position.z+=scene.children[x].velocity.z;
 					}
-					if( Math.abs(currentTime-scene.children[x].createdTime) > 1800){
-						var scaleRate=2.0;
+					if( Math.abs(currentTime-scene.children[x].createdTime) > 1300){
+						var scaleRate=1.5;
 						scene.children[x].scale.set(temp.scale.x+scaleRate, temp.scale.y+scaleRate, temp.scale.y+scaleRate );
 						scene.children[x].velocity.set(0,0,0)
-					}
-					if( Math.abs(currentTime-scene.children[x].createdTime) > 2000){
-						scene.remove(temp);
+						if(scene.children[x].material.opacity>0.){
+							scene.children[x].userData.aplha=scene.children[x].userData.aplha-.6;
+							console.log(scene.children[x].userData.aplha)
+							scene.children[x].material.opacity = scene.children[x].material.opacity -.6;
+						}else{
+							scene.remove(temp);
+						}
 					}
 				}
 
@@ -474,24 +481,32 @@
 
 			}
 
-			function drawPoint(delta){
-				var geometry = new THREE.SphereGeometry( .05, 44, 44 );
+			function drawPoint(delta, distance){
+				var geometry = new THREE.SphereGeometry( .015, 44, 44 );
 				var temp=new Date().getTime()%5000
 				temp=temp/5000*255;
-				var material = new THREE.MeshPhongMaterial( {color: rgbToHex(temp,0,255-temp), transparent: true, opacity:1., alphaMap: ballTexture} );
+				var material = new THREE.MeshBasicMaterial( {color: rgbToHex(255-temp/3,temp/4,0), transparent: true, opacity:8., alphaMap: ballTexture} );
 				var sphere = new THREE.Mesh( geometry, material );
 				sphere.idType="p1"
 				sphere.velocity= new THREE.Vector3();
-				sphere.velocity.x = ( 1.0 - 0.5 ) * 0.02 * delta *3.8;
-				sphere.velocity.y = ( 1.0 - 0.5 ) * 0.02 * delta *3.8;
-				sphere.velocity.z = ( 1.0 * 0.01 - 0.05 ) * delta *3.8;
 				sphere.position.copy( controller2.position );
 				if(window.location.href.indexOf("localhost")!=-1){
 					sphere.velocity.set(0.0, 0.05, -.05)
 				}else{
 					sphere.velocity.applyQuaternion (controller2.quaternion);
 				}
+				if(distance=="short"){
+					sphere.velocity.x += (Math.random() - 0.5)*.04 ;
+					sphere.velocity.y += (Math.random() - 0.5)*.04 ;
+					sphere.velocity.z += (Math.random() - 0.5)*.04 ;
+				}
+				if(distance=="long"){
+					sphere.velocity.x += (Math.random() - 0.5)*.04 ;
+					sphere.velocity.y += (Math.random() - 0.5)*.04;
+					sphere.velocity.z += ((Math.random() - 0.5)*.04)-.11 ;
+				}
 				sphere.createdTime=new Date().getTime();
+				sphere.userData.aplha=1.;
 				scene.add( sphere );
 				console.log(scene.children.length)
 			}
