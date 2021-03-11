@@ -111,6 +111,7 @@
 			let controller, controller2, controllerGrip, controllerGrip2;
 			var c2select=false;
 			var c2squeeze=false;
+			var ballTexture=new THREE.TextureLoader().load( 'assets/noise.jpg' )
 
 			let INTERSECTED;
 			const tempMatrix = new THREE.Matrix4();
@@ -454,6 +455,11 @@
 						scene.children[x].position.y+=scene.children[x].velocity.y;
 						scene.children[x].position.z+=scene.children[x].velocity.z;
 					}
+					if( Math.abs(currentTime-scene.children[x].createdTime) > 1800){
+						var scaleRate=2.0;
+						scene.children[x].scale.set(temp.scale.x+scaleRate, temp.scale.y+scaleRate, temp.scale.y+scaleRate );
+						scene.children[x].velocity.set(0,0,0)
+					}
 					if( Math.abs(currentTime-scene.children[x].createdTime) > 2000){
 						scene.remove(temp);
 					}
@@ -465,18 +471,22 @@
 			}
 
 			function drawPoint(delta){
-				var geometry = new THREE.SphereGeometry( .1, 44, 44 );
+				var geometry = new THREE.SphereGeometry( .05, 44, 44 );
 				var temp=new Date().getTime()%5000
 				temp=temp/5000*255;
-				var material = new THREE.MeshBasicMaterial( {color: rgbToHex(temp,0,255-temp) } );
+				var material = new THREE.MeshPhongMaterial( {color: rgbToHex(temp,0,255-temp), transparent: true, opacity:1., alphaMap: ballTexture} );
 				var sphere = new THREE.Mesh( geometry, material );
 				sphere.idType="p1"
 				sphere.velocity= new THREE.Vector3();
 				sphere.velocity.x = ( 1.0 - 0.5 ) * 0.02 * delta *3.8;
 				sphere.velocity.y = ( 1.0 - 0.5 ) * 0.02 * delta *3.8;
 				sphere.velocity.z = ( 1.0 * 0.01 - 0.05 ) * delta *3.8;
-				sphere.velocity.applyQuaternion (controller2.quaternion);
 				sphere.position.copy( controller2.position );
+				if(window.location.href.indexOf("localhost")!=-1){
+					sphere.velocity.set(0.0, 0.05, -.05)
+				}else{
+					sphere.velocity.applyQuaternion (controller2.quaternion);
+				}
 				sphere.createdTime=new Date().getTime();
 				scene.add( sphere );
 				console.log(scene.children.length)
