@@ -158,7 +158,7 @@
 				hfmaterial.map.wrapT=THREE.MirroredRepeatWrapping;
 				var cap = new THREE.Mesh(capGeom, hfmaterial);
 				hemiSphere.add(cap);
-				hemiSphere.position.y=-1.0;
+				hemiSphere.position.y=-1.5;
 				scene.add(hemiSphere);
 
 
@@ -425,7 +425,7 @@
 					// }
 
 					// if ( cube.position.y < 0 || cube.position.y > 6 ) {
-					if ( cube.position.y < -1.) {
+					if ( cube.position.y < -1.5) {
 						cube.position.y = THREE.MathUtils.clamp( cube.position.y, 0, 6 );
 						cube.userData.velocity.y = - cube.userData.velocity.y;
 					}
