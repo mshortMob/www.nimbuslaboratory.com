@@ -498,12 +498,7 @@
 					sphere.velocity.y = ( Math.random() - 0.5 ) * 0.02 * delta *3.8;
 					sphere.velocity.z = ( Math.random() * 0.01 - 0.05 ) * delta *3.8;
 					sphere.velocity.applyQuaternion (controller2.quaternion);
-					if(distance=="long"){
-						sphere.velocity.z = sphere.velocity.z * 5.;
-					}
-					if(distance=="short"){
-						sphere.velocity.z = sphere.velocity.z / 4.;
-					}
+					sphere.velocity.z = sphere.velocity.z * 5.;
 				}
 				sphere.createdTime=new Date().getTime();
 				sphere.userData.aplha=1.;
