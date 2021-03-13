@@ -106,86 +106,43 @@
 			let camera, scene, raycaster, renderer;
 
 			let room;
-			let group;
 
-			let controller, controller2, controllerGrip, controllerGrip2;
-			var c2select=false;
-			var c2squeeze=false;
-			var ballTexture=new THREE.TextureLoader().load( 'assets/noise.jpg' )
-
+			let controller, controllerGrip;
 			let INTERSECTED;
 			const tempMatrix = new THREE.Matrix4();
-
-			var amount = 4;
-			if(window.location.href.indexOf("localhost")!=-1){
-				var numGroups = 4;
-			}else{
-				var numGroups = 30;
-			}
-			
-			var sPressed=false;
-			var triggerTime=new Date().getTime();
 
 			init();
 			animate();
 
 			function init() {
 
-				window.addEventListener("keypress", keyHandler);
-				window.addEventListener("keyup", keyHandler);
-
 				container = document.createElement( 'div' );
 				document.body.appendChild( container );
 
 				scene = new THREE.Scene();
+				scene.background = new THREE.Color( 0x505050 );
 
-				// const planeGeometry = new THREE.PlaneGeometry( 5, 5, 32 );
-				// const planeMaterial = new THREE.MeshBasicMaterial( {color: 0x333333, side: THREE.DoubleSide} );
-				// const plane = new THREE.Mesh( planeGeometry, planeMaterial );
-				// plane.rotation.x=Math.PI/2;
-				// scene.add( plane );
-				var radius = 60;
-				var radialSegments = 32;
-				var hsmaterial = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/stars3.jpg' ), opacity: .34, transparent:true });
-				var hemiSphereGeom = new THREE.SphereBufferGeometry(radius, radialSegments, Math.round(radialSegments / 4), 0, Math.PI * 2, 0, Math.PI * 0.5);
-				var hemiSphere = new THREE.Mesh(hemiSphereGeom, hsmaterial);
-				var capGeom = new THREE.CircleBufferGeometry(radius, radialSegments);
-				capGeom.rotateX(Math.PI * 0.5);
-				var hfmaterial = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/grass2.jpg' ), opacity: .125, transparent:true });
-				hfmaterial.map.offset.set( 0, 0 );
-				hfmaterial.map.repeat.set( 16, 16 );
-				hfmaterial.map.wrapS=THREE.MirroredRepeatWrapping;
-				hfmaterial.map.wrapT=THREE.MirroredRepeatWrapping;
-				var cap = new THREE.Mesh(capGeom, hfmaterial);
-				hemiSphere.add(cap);
-				hemiSphere.position.y=-1.5;
-				scene.add(hemiSphere);
-
-
-				// scene.background = new THREE.Color( 0x000000 );
-				const background = new THREE.CubeTextureLoader()
-					.setPath( 'assets/' )
-					.load( [ 'dark-s_px.jpg', 'dark-s_nx.jpg', 'dark-s_py.jpg', 'dark-s_ny.jpg', 'dark-s_pz.jpg', 'dark-s_nz.jpg' ] );
-				// scene.background = background;
-
-				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 100 );
-				camera.position.set( 0, 1.6, 3);
+				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 10 );
+				camera.position.set( 0, 1.6, 3 );
 				scene.add( camera );
 
 				room = new THREE.LineSegments(
-					new BoxLineGeometry( 6000, 6000, 6000, 10, 10, 10 ).translate( 0, 3, 0 ),
-					new THREE.LineBasicMaterial( { color: 0xaaaaaa, opacity: 1.0, transparent:true } )
+					new BoxLineGeometry( 6, 6, 6, 10, 10, 10 ).translate( 0, 3, 0 ),
+					new THREE.LineBasicMaterial( { color: 0x808080 } )
 				);
 				scene.add( room );
+
 				scene.add( new THREE.HemisphereLight( 0x606060, 0x404040 ) );
 
 				const light = new THREE.DirectionalLight( 0xffffff );
 				light.position.set( 1, 1, 1 ).normalize();
 				scene.add( light );
 
-				for ( let i = 0; i < numGroups; i ++ ) {
+				const geometry = new THREE.BoxGeometry( 0.15, 0.15, 0.15 );
 
-					var object=createSpriteSphere();
+				for ( let i = 0; i < 200; i ++ ) {
+
+					const object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
 
 					object.position.x = Math.random() * 4 - 2;
 					object.position.y = Math.random() * 4;
@@ -195,7 +152,9 @@
 					object.rotation.y = Math.random() * 2 * Math.PI;
 					object.rotation.z = Math.random() * 2 * Math.PI;
 
-					object.scale.set(.05,.05,.05);
+					object.scale.x = Math.random() + 0.5;
+					object.scale.y = Math.random() + 0.5;
+					object.scale.z = Math.random() + 0.5;
 
 					object.userData.velocity = new THREE.Vector3();
 					object.userData.velocity.x = Math.random() * 0.01 - 0.005;
@@ -205,8 +164,6 @@
 					room.add( object );
 
 				}
-
-				// scene.add( group );
 
 				raycaster = new THREE.Raycaster();
 
@@ -234,15 +191,6 @@
 				controller = renderer.xr.getController( 0 );
 				controller.addEventListener( 'selectstart', onSelectStart );
 				controller.addEventListener( 'selectend', onSelectEnd );
-				controller.addEventListener( 'squeezestart', onSelectStart );
-				controller.addEventListener( 'squeezeend', onSelectEnd );
-
-				controller2 = renderer.xr.getController( 1 );
-				controller2.addEventListener( 'selectstart', function(){ c2select=true;  } );
-				controller2.addEventListener( 'selectend',  function(){ c2select=false;  } );
-				controller2.addEventListener( 'squeezestart',  function(){ c2squeeze=true;  }  );
-				controller2.addEventListener( 'squeezeend',  function(){ c2squeeze=false;  }  );
-
 				controller.addEventListener( 'connected', function ( event ) {
 
 					this.add( buildController( event.data ) );
@@ -260,9 +208,6 @@
 				controllerGrip = renderer.xr.getControllerGrip( 0 );
 				controllerGrip.add( controllerModelFactory.createControllerModel( controllerGrip ) );
 				scene.add( controllerGrip );
-				controllerGrip2 = renderer.xr.getControllerGrip( 1 );
-				controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
-				scene.add( controllerGrip2 );
 
 				window.addEventListener( 'resize', onWindowResize );
 
@@ -307,77 +252,33 @@
 
 			}
 
+			//
+
 			function animate() {
 
 				renderer.setAnimationLoop( render );
 
 			}
 
-			function setOpacity( obj, opacity ) {
-				obj.children.forEach((child)=>{
-					setOpacity( child, opacity );
-				});
-				if ( obj.material ) {
-					obj.material.opacity = opacity ;
-				};
-			};
-					
-			function keyHandler(event){
-				if(event.key=="s" && event.type=="keypress"){
-					sPressed=true;
-				}
-				if(event.key=="s" && event.type=="keyup"){
-					sPressed=false;
-				}
-				if(event.key=="d"){
-					drawPoint(null, "short");
-				}
-				if(event.key=="f"){
-					drawPoint(null, "long");
-				}
-			}
-			
 			function render() {
+
 				const delta = clock.getDelta() * 60;
-				var currentTime=new Date().getTime();
-				if ( controller.userData.isSelecting === true || sPressed==true) {
+
+				if ( controller.userData.isSelecting === true ) {
+
 					const cube = room.children[ 0 ];
-					cube.triggerTime=new Date().getTime();
-					cube.alphaIndex=1;
 					room.remove( cube );
 
 					cube.position.copy( controller.position );
-					cube.userData.velocity.x = ( Math.random() - 0.5 ) * 0.02 * delta *3.8;
-					cube.userData.velocity.y = ( Math.random() - 0.5 ) * 0.02 * delta *3.8;
-					cube.userData.velocity.z = ( Math.random() * 0.01 - 0.05 ) * delta *3.8;
+					cube.userData.velocity.x = ( Math.random() - 0.5 ) * 0.02 * delta;
+					cube.userData.velocity.y = ( Math.random() - 0.5 ) * 0.02 * delta;
+					cube.userData.velocity.z = ( Math.random() * 0.01 - 0.05 ) * delta;
 					cube.userData.velocity.applyQuaternion( controller.quaternion );
-					cube.scale.set(.05,.05,.05);
 					room.add( cube );
-					setOpacity( cube, 1.0 );
+
 				}
 
-				for(var x=0; x<numGroups; x++){
-					var cube = room.children[ x ];
-					var a=1000;
-					var b=1005;
-					var c=10000;
-					var burstSpeed=.27;
-					var fadeSpeed=0.04;
-					if( Math.abs(currentTime-cube.triggerTime) > a &&  Math.abs(currentTime-cube.triggerTime) <= b ){
-						cube.scale.x+=burstSpeed;
-						cube.scale.y+=burstSpeed;
-						cube.scale.z+=burstSpeed;
-					}
-					if( Math.abs(currentTime-cube.triggerTime) > b &&  Math.abs(currentTime-cube.triggerTime) <= c ){
-						cube.scale.x+=.1;
-						cube.scale.y+=.1;
-						cube.scale.z+=.1;
-						cube.alphaIndex-=fadeSpeed;
-						cube.userData.velocity.set(cube.userData.velocity.x/1.125,cube.userData.velocity.y/1.125,cube.userData.velocity.z/1.125);
-						setOpacity( cube, cube.alphaIndex );
-					}
-				}
-				
+				// find intersections
 
 				tempMatrix.identity().extractRotation( controller.matrixWorld );
 
@@ -394,8 +295,7 @@
 
 						INTERSECTED = intersects[ 0 ].object;
 						INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-						
-						// INTERSECTED.material.emissive.setHex( 0xff0000 );
+						INTERSECTED.material.emissive.setHex( 0xff0000 );
 
 					}
 
@@ -417,25 +317,26 @@
 
 					cube.position.add( cube.userData.velocity );
 
-					// if ( cube.position.x < - 3 || cube.position.x > 3 ) {
+					if ( cube.position.x < - 3 || cube.position.x > 3 ) {
 
-					// 	cube.position.x = THREE.MathUtils.clamp( cube.position.x, - 3, 3 );
-					// 	cube.userData.velocity.x = - cube.userData.velocity.x;
+						cube.position.x = THREE.MathUtils.clamp( cube.position.x, - 3, 3 );
+						cube.userData.velocity.x = - cube.userData.velocity.x;
 
-					// }
-
-					// if ( cube.position.y < 0 || cube.position.y > 6 ) {
-					if ( cube.position.y < -1.5) {
-						cube.position.y = THREE.MathUtils.clamp( cube.position.y, 0, 6 );
-						cube.userData.velocity.y = - cube.userData.velocity.y;
 					}
 
-					// if ( cube.position.z < - 3 || cube.position.z > 3 ) {
+					if ( cube.position.y < 0 || cube.position.y > 6 ) {
 
-					// 	cube.position.z = THREE.MathUtils.clamp( cube.position.z, - 3, 3 );
-					// 	cube.userData.velocity.z = - cube.userData.velocity.z;
+						cube.position.y = THREE.MathUtils.clamp( cube.position.y, 0, 6 );
+						cube.userData.velocity.y = - cube.userData.velocity.y;
 
-					// }
+					}
+
+					if ( cube.position.z < - 3 || cube.position.z > 3 ) {
+
+						cube.position.z = THREE.MathUtils.clamp( cube.position.z, - 3, 3 );
+						cube.userData.velocity.z = - cube.userData.velocity.z;
+
+					}
 
 					cube.rotation.x += cube.userData.velocity.x * 2 * delta;
 					cube.rotation.y += cube.userData.velocity.y * 2 * delta;
@@ -443,128 +344,9 @@
 
 				}
 
-				const time = Date.now() / 1000;
-
-				group.rotation.x = time * 0.01;
-				group.rotation.y = time * 0.005;
-                // group.scale.set(time/2%3,time/2%3,time/2%3);
-				// group.rotation.z = time * 1.0;
-
-				if(c2select){
-					scene.add(drawPoint(delta,"short"));
-				}
-				if(c2squeeze){
-					scene.add(drawPoint(delta,"long"));
-				}
-				for(var x=0; x<scene.children.length; x++){
-					if(scene.children[x].idType=="p1"){
-						var temp=scene.children[x]
-						scene.children[x].position.x+=scene.children[x].velocity.x;
-						scene.children[x].position.y+=scene.children[x].velocity.y;
-						scene.children[x].position.z+=scene.children[x].velocity.z;
-					}
-					if( Math.abs(currentTime-scene.children[x].createdTime) > 1300){
-						var scaleRate=1.5;
-						scene.children[x].scale.set(temp.scale.x+scaleRate, temp.scale.y+scaleRate, temp.scale.y+scaleRate );
-						scene.children[x].velocity.set(0,0,0)
-						if(scene.children[x].material.opacity>0.){
-							scene.children[x].userData.aplha=scene.children[x].userData.aplha-.6;
-							console.log(scene.children[x].userData.aplha)
-							scene.children[x].material.opacity = scene.children[x].material.opacity -.6;
-						}else{
-							scene.remove(temp);
-						}
-					}
-				}
-
-				// room.material.opacity=0.0;
 				renderer.render( scene, camera );
 
 			}
-
-			function drawPoint(delta, distance){
-				var geometry = new THREE.SphereGeometry( .015, 44, 44 );
-				var temp=new Date().getTime()%5000
-				temp=temp/5000*255;
-				var material = new THREE.MeshBasicMaterial( {color: rgbToHex(255-temp/3,temp/4,0), transparent: true, opacity:8., alphaMap: ballTexture} );
-				var sphere = new THREE.Mesh( geometry, material );
-				sphere.idType="p1"
-				sphere.velocity= new THREE.Vector3();
-				sphere.position.copy( controller2.position );
-				if(window.location.href.indexOf("localhost")!=-1){
-					sphere.velocity.set(0.0, 0.05, -.05)
-				}else{
-					sphere.velocity.x = ( Math.random() - 0.5 ) * 0.02 * delta *3.8;
-					sphere.velocity.y = ( Math.random() - 0.5 ) * 0.02 * delta *3.8;
-					sphere.velocity.z = ( Math.random() * 0.01 - 0.05 ) * delta *3.8;
-					sphere.velocity.applyQuaternion (controller2.quaternion);
-					sphere.velocity.z = sphere.velocity.z * 5.;
-				}
-				sphere.createdTime=new Date().getTime();
-				sphere.userData.aplha=1.;
-				scene.add( sphere );
-				console.log(scene.children.length)
-			}
-
-			function rgbToHex(r, g, b) {
-                    r=parseInt(r);
-                    g=parseInt(g);
-                    b=parseInt(b);
-                    function componentToHex(c) {
-                        var hex = c.toString(16);
-                        return hex.length == 1 ? "0" + hex : hex;
-                    }
-                    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
-            }
-
-            function createSpriteSphere(){
-				const radius = .5;
-
-                var xList=[];
-                var yList=[];
-                var zList=[];
-                var rList=[];
-                var gList=[];
-                var bList=[];
-                for(var x=0; x<amount; x++){
-                    for(var y=0; y<amount; y++){
-                        for(var z=0; z<amount; z++){
-                            xList.push((x/amount)-.5);
-                            yList.push((y/amount)-.5);
-                            zList.push((z/amount)-.5);
-                            rList.push((x/amount)*255);
-                            gList.push((y/amount)*255);
-                            bList.push((z/amount)*255);
-                        }
-                    }
-                }
-                // console.log(gList);
-
-				group = new THREE.Group();
-                var spriteTexture1=new THREE.TextureLoader().load( "sprites/sprite1.png" );
-				var spriteTexture2=new THREE.TextureLoader().load( "sprites/sprite2.png" );
-				var spriteTexture3=new THREE.TextureLoader().load( "sprites/sprite3.png" );
-				var spriteTextures=[spriteTexture1, spriteTexture2, spriteTexture3];
-				for ( let a = 0; a < amount*amount*amount; a ++ ) {                    
-					var material = new THREE.SpriteMaterial( { map: spriteTextures[a%3], color: rgbToHex(rList[a],gList[a],bList[a]), fog: true, blending: THREE.AdditiveBlending, depthTest: false, transparent: true } );
-
-					const x = xList[a];
-					const y = yList[a];
-					const z = zList[a];
-
-					var sprite = new THREE.Sprite( material );
-					sprite.position.set( x,y,z );
-					sprite.position.normalize();
-					sprite.position.multiplyScalar( radius );
-                    sprite.scale.set( .2, .2, .2 );
-					group.position.y=2;
-					group.position.z=-1;
-					group.triggerTime=new Date().getTime();
-					group.alpha=1;
-					group.add( sprite );
-				}
-				return group;
-            }
 
 		</script>
 	</body>
