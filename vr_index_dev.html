@@ -406,15 +406,15 @@
 					if(x==0 && y==0 && z==0 && isMirror==false){
 						if(controllerNumber==1){
 							mesh.position.copy( controller.position );
-							mesh.position.z=(mesh.position.z*8)-4.5;
-							mesh.position.x*=8;
-							mesh.position.y=(mesh.position.y*8)-3.5;
+							mesh.position.z=(mesh.position.z*12)-4.5;
+							mesh.position.x*=12;
+							mesh.position.y=(mesh.position.y*12)-3.5;
 						}
 						if(controllerNumber==2){
 							mesh.position.copy( controller2.position );
-							mesh.position.z=(mesh.position.z*8)-4.5;
-							mesh.position.x*=8;
-							mesh.position.y=(mesh.position.y*8)-3.5;							
+							mesh.position.z=(mesh.position.z*12)-4.5;
+							mesh.position.x*=12;
+							mesh.position.y=(mesh.position.y*12)-3.5;							
 						}
 						addObject(mesh.position.x,mesh.position.y,mesh.position.z,true,controllerNumber)
 					}else{
