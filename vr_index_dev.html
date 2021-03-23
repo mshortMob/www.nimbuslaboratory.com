@@ -105,8 +105,6 @@
 			let camera, scene, raycaster, renderer;
 			let room;
 			let controller, controller2, controllerGrip, controllerGrip2;
-			var c2select=false;
-			var c2squeeze=false;
 			let colorIndex;
 			let INTERSECTED;
 			const tempMatrix = new THREE.Matrix4();
@@ -167,10 +165,10 @@
 				controller.addEventListener( 'squeezeend', onSelectEnd );
 
 				controller2 = renderer.xr.getController( 1 );
-				controller2.addEventListener( 'selectstart', function(){ c2select=true;  } );
-				controller2.addEventListener( 'selectend',  function(){ c2select=false;  } );
-				controller2.addEventListener( 'squeezestart',  function(){ c2squeeze=true;  }  );
-				controller2.addEventListener( 'squeezeend',  function(){ c2squeeze=false;  }  );
+				controller2.addEventListener( 'selectstart', onSelectStart );
+				controller2.addEventListener( 'selectend', onSelectEnd );
+				controller2.addEventListener( 'squeezestart', onSelectStart );
+				controller2.addEventListener( 'squeezeend', onSelectEnd );
 
 				controller.addEventListener( 'connected', function ( event ) {
 					this.add( buildController( event.data ) );
