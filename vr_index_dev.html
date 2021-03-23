@@ -98,147 +98,140 @@
 
 			import { BoxLineGeometry } from 'https://threejs.org/examples/jsm/geometries/BoxLineGeometry.js';
 			import { VRButton } from 'https://threejs.org/examples/jsm/webxr/VRButton.js';
-			import { OrbitControls } from 'https://threejs.org/examples/jsm/controls/OrbitControls.js';
-			import { TubePainter } from 'https://threejs.org/examples/jsm/misc/TubePainter.js';
 			import { XRControllerModelFactory } from 'https://threejs.org/examples/jsm/webxr/XRControllerModelFactory.js';
 
-			let camera, scene, renderer;
-			let controller1, controller2;
-
-			const cursor = new THREE.Vector3();
-
-			let controls;
+			const clock = new THREE.Clock();
+			let container;
+			let camera, scene, raycaster, renderer;
+			let room;
+			let controller, controller2, controllerGrip, controllerGrip2;
+			var c2select=false;
+			var c2squeeze=false;
+			let colorIndex;
+			let INTERSECTED;
+			const tempMatrix = new THREE.Matrix4();
 
 			init();
 			animate();
 
 			function init() {
-
-				const container = document.createElement( 'div' );
+				window.addEventListener("keypress", keyHandler);
+				window.addEventListener("keyup", keyHandler);
+				container = document.createElement( 'div' );
 				document.body.appendChild( container );
-
 				scene = new THREE.Scene();
-				scene.background = new THREE.Color( 0x222222 );
+				scene.add(createHemisphereMap());
+				initCameraAndLights();
+				raycaster = new THREE.Raycaster();
+				initRenderer();
+				initControllers();
+				window.addEventListener( 'resize', onWindowResize );
+				document.body.appendChild( VRButton.createButton( renderer ) );
 
-				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.01, 50 );
-				camera.position.set( 0, 1.6, 3 );
+				colorIndex=createColorIndex();
+				addObject(0,0,0,false,1);
+			}
 
-				controls = new OrbitControls( camera, container );
-				controls.target.set( 0, 1.6, 0 );
-				controls.update();
-
-				const tableGeometry = new THREE.BoxGeometry( 0.5, 0.8, 0.5 );
-				const tableMaterial = new THREE.MeshStandardMaterial( {
-					color: 0x444444,
-					roughness: 1.0,
-					metalness: 0.0
-				} );
-				const table = new THREE.Mesh( tableGeometry, tableMaterial );
-				table.position.y = 0.35;
-				table.position.z = 0.85;
-				scene.add( table );
-
-				const floorGometry = new THREE.PlaneGeometry( 4, 4 );
-				const floorMaterial = new THREE.MeshStandardMaterial( {
-					color: 0x222222,
-					roughness: 1.0,
-					metalness: 0.0
-				} );
-				const floor = new THREE.Mesh( floorGometry, floorMaterial );
-				floor.rotation.x = - Math.PI / 2;
-				scene.add( floor );
-
-				const grid = new THREE.GridHelper( 10, 20, 0x111111, 0x111111 );
-				// grid.material.depthTest = false; // avoid z-fighting
-				scene.add( grid );
-
-				scene.add( new THREE.HemisphereLight( 0x888877, 0x777788 ) );
-
-				const light = new THREE.DirectionalLight( 0xffffff, 0.5 );
-				light.position.set( 0, 4, 0 );
-				scene.add( light );
-
-				//
-
-				const painter1 = new TubePainter();
-				scene.add( painter1.mesh );
-
-				const painter2 = new TubePainter();
-				scene.add( painter2.mesh );
-
-				//
-
+			function initRenderer(){
 				renderer = new THREE.WebGLRenderer( { antialias: true } );
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				renderer.outputEncoding = THREE.sRGBEncoding;
 				renderer.xr.enabled = true;
 				container.appendChild( renderer.domElement );
+			}
 
-				document.body.appendChild( VRButton.createButton( renderer ) );
+			function initCameraAndLights(){
+				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 100 );
+				camera.position.set( 0, 1.6, 3);
+				scene.add( camera );
 
-				// controllers
+				scene.add( new THREE.HemisphereLight( 0x606060, 0x404040 ) );
+				const light = new THREE.DirectionalLight( 0xffffff );
+				light.position.set( 1, 1, 1 ).normalize();
+				scene.add( light );
+			}
 
+			function initControllers(){
 				function onSelectStart() {
-
 					this.userData.isSelecting = true;
-
 				}
-
 				function onSelectEnd() {
-
 					this.userData.isSelecting = false;
-
 				}
 
-				function onSqueezeStart() {
-
-					this.userData.isSqueezing = true;
-					this.userData.positionAtSqueezeStart = this.position.y;
-					this.userData.scaleAtSqueezeStart = this.scale.x;
-
-				}
-
-				function onSqueezeEnd() {
-
-					this.userData.isSqueezing = false;
-
-				}
-
-				controller1 = renderer.xr.getController( 0 );
-				controller1.addEventListener( 'selectstart', onSelectStart );
-				controller1.addEventListener( 'selectend', onSelectEnd );
-				controller1.addEventListener( 'squeezestart', onSqueezeStart );
-				controller1.addEventListener( 'squeezeend', onSqueezeEnd );
-				controller1.userData.painter = painter1;
-				scene.add( controller1 );
+				controller = renderer.xr.getController( 0 );
+				controller.addEventListener( 'selectstart', onSelectStart );
+				controller.addEventListener( 'selectend', onSelectEnd );
+				controller.addEventListener( 'squeezestart', onSelectStart );
+				controller.addEventListener( 'squeezeend', onSelectEnd );
 
 				controller2 = renderer.xr.getController( 1 );
-				controller2.addEventListener( 'selectstart', onSelectStart );
-				controller2.addEventListener( 'selectend', onSelectEnd );
-				controller2.addEventListener( 'squeezestart', onSqueezeStart );
-				controller2.addEventListener( 'squeezeend', onSqueezeEnd );
-				controller2.userData.painter = painter2;
-				scene.add( controller2 );
+				controller2.addEventListener( 'selectstart', function(){ c2select=true;  } );
+				controller2.addEventListener( 'selectend',  function(){ c2select=false;  } );
+				controller2.addEventListener( 'squeezestart',  function(){ c2squeeze=true;  }  );
+				controller2.addEventListener( 'squeezeend',  function(){ c2squeeze=false;  }  );
 
-				//
+				controller.addEventListener( 'connected', function ( event ) {
+					this.add( buildController( event.data ) );
+				} );
+				controller.addEventListener( 'disconnected', function () {
+					this.remove( this.children[ 0 ] );
+				} );
+				scene.add( controller );
 
-				const geometry = new THREE.CylinderGeometry( 0.01, 0.02, 0.08, 5 );
-				geometry.rotateX( - Math.PI / 2 );
-				const material = new THREE.MeshStandardMaterial( { flatShading: true } );
-				const mesh = new THREE.Mesh( geometry, material );
+				const controllerModelFactory = new XRControllerModelFactory();
 
-				const pivot = new THREE.Mesh( new THREE.IcosahedronGeometry( 0.01, 3 ) );
-				pivot.name = 'pivot';
-				pivot.position.z = - 0.05;
-				mesh.add( pivot );
+				controllerGrip = renderer.xr.getControllerGrip( 0 );
+				controllerGrip.add( controllerModelFactory.createControllerModel( controllerGrip ) );
+				scene.add( controllerGrip );
+				controllerGrip2 = renderer.xr.getControllerGrip( 1 );
+				controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
+				scene.add( controllerGrip2 );
+			}
 
-				controller1.add( mesh.clone() );
-				controller2.add( mesh.clone() );
+			function createHemisphereMap(){
+				var radius = 60;
+				var radialSegments = 32;
+				var hsmaterial = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/stars3.jpg' ), opacity: .34, transparent:true });
+				var hemiSphereGeom = new THREE.SphereBufferGeometry(radius, radialSegments, Math.round(radialSegments / 4), 0, Math.PI * 2, 0, Math.PI * 0.5);
+				var hemiSphere = new THREE.Mesh(hemiSphereGeom, hsmaterial);
+				var capGeom = new THREE.CircleBufferGeometry(radius, radialSegments);
+				capGeom.rotateX(Math.PI * 0.5);
+				var hfmaterial = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/grass2.jpg' ),  bumpScale:1, bumpMap: new THREE.TextureLoader().load( 'assets/grass2.jpg' ), opacity: .125, transparent:true });
+				hfmaterial.map.offset.set( 0, 0 );
+				hfmaterial.map.repeat.set( 16, 16 );
+				hfmaterial.map.wrapS=THREE.MirroredRepeatWrapping;
+				hfmaterial.map.wrapT=THREE.MirroredRepeatWrapping;
+				var cap = new THREE.Mesh(capGeom, hfmaterial);
+				hemiSphere.add(cap);
+				hemiSphere.position.y=-1.5;
+				return hemiSphere;
+			}
 
-				//
+			function buildController( data ) {
 
-				window.addEventListener( 'resize', onWindowResize );
+				let geometry, material;
+
+				switch ( data.targetRayMode ) {
+
+					case 'tracked-pointer':
+
+						geometry = new THREE.BufferGeometry();
+						geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( [ 0, 0, 0, 0, 0, - 1 ], 3 ) );
+						geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( [ 0.5, 0.5, 0.5, 0, 0, 0 ], 3 ) );
+
+						material = new THREE.LineBasicMaterial( { vertexColors: true, blending: THREE.AdditiveBlending } );
+
+						return new THREE.Line( geometry, material );
+
+					case 'gaze':
+
+						geometry = new THREE.RingGeometry( 0.02, 0.04, 32 ).translate( 0, 0, - 1 );
+						material = new THREE.MeshBasicMaterial( { opacity: 0.5, transparent: true } );
+						return new THREE.Mesh( geometry, material );
+
+				}
 
 			}
 
@@ -251,51 +244,188 @@
 
 			}
 
-			function handleController( controller ) {
-
-				const userData = controller.userData;
-				const painter = userData.painter;
-
-				const pivot = controller.getObjectByName( 'pivot' );
-
-				if ( userData.isSqueezing === true ) {
-
-					const delta = ( controller.position.y - userData.positionAtSqueezeStart ) * 5;
-					const scale = Math.max( 0.1, userData.scaleAtSqueezeStart + delta );
-
-					pivot.scale.setScalar( scale );
-					painter.setSize( scale );
-
-				}
-
-				cursor.setFromMatrixPosition( pivot.matrixWorld );
-
-				if ( userData.isSelecting === true ) {
-
-					painter.lineTo( cursor );
-					painter.update();
-
-				} else {
-
-					painter.moveTo( cursor );
-
-				}
-
-			}
-
 			function animate() {
-
 				renderer.setAnimationLoop( render );
-
+			}
+					
+			function keyHandler(event){
+				if(event.key=="s" && event.type=="keypress"){
+					console.log("s down");
+				}
+				if(event.key=="s" && event.type=="keyup"){
+					console.log("s up");
+				}
+			}
+			
+			function render() {
+				if ( controller.userData.isSelecting === true ){
+					addObject(0,0,0,false,1);
+				}
+				for(var x=0; x<scene.children.length; x++){
+					if(scene.children[x].class=="object"){
+						scene.children[x].update();
+					}
+				}
+				renderer.render( scene, camera );
 			}
 
-			function render() {
+			function rgbToHex(r, g, b) {
+                    r=parseInt(r);
+                    g=parseInt(g);
+                    b=parseInt(b);
+                    function componentToHex(c) {
+                        var hex = c.toString(16);
+                        return hex.length == 1 ? "0" + hex : hex;
+                    }
+                    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+            }
 
-				handleController( controller1 );
-				handleController( controller2 );
+            function createSpriteSphere(){
+				const radius = .5;
 
-				renderer.render( scene, camera );
+                var xList=[];
+                var yList=[];
+                var zList=[];
+                var rList=[];
+                var gList=[];
+                var bList=[];
+                for(var x=0; x<amount; x++){
+                    for(var y=0; y<amount; y++){
+                        for(var z=0; z<amount; z++){
+                            xList.push((x/amount)-.5);
+                            yList.push((y/amount)-.5);
+                            zList.push((z/amount)-.5);
+                            rList.push((x/amount)*255);
+                            gList.push((y/amount)*255);
+                            bList.push((z/amount)*255);
+                        }
+                    }
+                }
+                // console.log(gList);
 
+				group = new THREE.Group();
+                var spriteTexture1=new THREE.TextureLoader().load( "sprites/sprite1.png" );
+				var spriteTexture2=new THREE.TextureLoader().load( "sprites/sprite2.png" );
+				var spriteTexture3=new THREE.TextureLoader().load( "sprites/sprite3.png" );
+				var spriteTextures=[spriteTexture1, spriteTexture2, spriteTexture3];
+				for ( let a = 0; a < amount*amount*amount; a ++ ) {                    
+					var material = new THREE.SpriteMaterial( { map: spriteTextures[a%3], color: rgbToHex(rList[a],gList[a],bList[a]), fog: true, blending: THREE.AdditiveBlending, depthTest: false, transparent: true } );
+
+					const x = xList[a];
+					const y = yList[a];
+					const z = zList[a];
+
+					var sprite = new THREE.Sprite( material );
+					sprite.position.set( x,y,z );
+					sprite.position.normalize();
+					sprite.position.multiplyScalar( radius );
+                    sprite.scale.set( .2, .2, .2 );
+					group.position.y=2;
+					group.position.z=-1;
+					group.triggerTime=new Date().getTime();
+					group.alpha=1;
+					group.add( sprite );
+				}
+				return group;
+            }
+
+			function createColorIndex(){
+				var rList=[];
+				for(var x=0; x<255; x=x+10){
+					rList.push(x);
+				}
+
+				for(var x=255; x>0; x=x-10){
+					rList.push(x);
+				}
+				for(var x=0; x<255; x=x+10){
+					rList.push(0);
+				}
+				// console.log(rList);
+
+				var gList=[];
+				for(var x=0; x<255; x=x+10){
+					gList.push(0);
+				}
+				for(var x=0; x<255; x=x+10){
+					gList.push(x);
+				}
+				for(var x=255; x>0; x=x-10){
+					gList.push(x);
+				}
+				// console.log(gList);
+
+
+				var bList=[];
+				for(var x=255; x>0; x=x-10){
+					bList.push(x);
+				}
+				for(var x=0; x<255; x=x+10){
+					bList.push(0);
+				}
+
+				for(var x=0; x<255; x=x+10){
+					bList.push(x);
+				}
+
+				var colorIndex=[];
+				for(var x=0; x<rList.length; x=x+1){
+					colorIndex.push({"r":rList[x], "g":gList[x], "b":bList[x]});
+				}
+				// setInterval(function(){
+				// 	console.log(colorIndex[ parseInt(new Date().getTime()/200)%colorIndex.length]);
+				// },50)
+				return(colorIndex);
+			}
+
+			function addObject(x,y,z,isMirror,controllerNumber){
+
+				var mesh=init();
+
+				function init(){
+					var geometry = new THREE.SphereGeometry( .1, 44, 44 );
+					var material = new THREE.MeshPhongMaterial( {color: rgbToHex(colorIndex[ parseInt(new Date().getTime()/200)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/200)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/200)%colorIndex.length].b)} );
+					var mesh = new THREE.Mesh( geometry, material );
+					mesh.class="object";
+					mesh.lifetime=6000;
+					mesh.createTime=new Date().getTime();
+					return mesh;
+
+				}
+
+				mesh.update=function(){
+					if( Math.abs(this.createTime-(new Date().getTime())) > this.lifetime ){
+							scene.remove(this);
+							this.geometry.dispose();
+							this.material.dispose();
+					}
+				}
+
+				mesh.setInitialPositionWithMirroring=function(){
+					if(x==0 && y==0 && z==0 && isMirror==false){
+						if(controllerNumber==1){
+							mesh.position.copy( controller.position );
+							mesh.position.z=(mesh.position.z*8)-4.5;
+							mesh.position.x*=8;
+							mesh.position.y=(mesh.position.y*8)-3.5;
+						}
+						if(controllerNumber==2){
+							mesh.position.copy( controller2.position );
+							mesh.position.z=(mesh.position.z*8)-4.5;
+							mesh.position.x*=8;
+							mesh.position.y=(mesh.position.y*8)-3.5;							
+						}
+						addObject(mesh.position.x,mesh.position.y,mesh.position.z,true,controllerNumber)
+					}else{
+						mesh.position.set(-x,y,z);
+					}
+					if(window.location.href.indexOf("localhost")!=-1){
+						mesh.position.set(0,1,-10.5);
+					}
+				}
+
+				mesh.setInitialPositionWithMirroring();
+				scene.add(mesh);
 			}
 
 		</script>
