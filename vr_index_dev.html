@@ -261,6 +261,9 @@
 				if ( controller.userData.isSelecting === true ){
 					addObject(0,0,0,false,1);
 				}
+				if ( controller2.userData.isSelecting === true ){
+					addObject(0,0,0,false,2);
+				}
 				for(var x=0; x<scene.children.length; x++){
 					if(scene.children[x].class=="object"){
 						scene.children[x].update();
