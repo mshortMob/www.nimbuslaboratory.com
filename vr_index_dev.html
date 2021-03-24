@@ -400,7 +400,7 @@
 
 				function init(){
 					if(button=="squeeze"){
-						var radius=.28;
+						var radius=.38;
 					}else{
 						var radius=.19;
 					}
@@ -408,10 +408,16 @@
 					var material = new THREE.MeshPhongMaterial( {color: rgbToHex(colorIndex[ parseInt(new Date().getTime()/200)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/200)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/200)%colorIndex.length].b)} );
 					var mesh = new THREE.Mesh( geometry, material );
 					mesh.class="object";
-					mesh.lifetime=6000;
+					mesh.lifetime=4000;
 					mesh.createTime=new Date().getTime();
 					mesh.velocity=new THREE.Vector3();
-					mesh.velocity.set(0,0,.015)
+					if(button=="squeeze"){
+						mesh.velocity.set(0,0,.067);
+						mesh.lifetime=4000;
+					}else{
+						mesh.velocity.set(0,0,.015);
+						mesh.lifetime=6000;
+					}
 					return mesh;
 
 				}
