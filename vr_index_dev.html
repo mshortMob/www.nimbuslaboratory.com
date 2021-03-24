@@ -384,7 +384,7 @@
 				var mesh=init();
 
 				function init(){
-					var geometry = new THREE.SphereGeometry( .25, 44, 44 );
+					var geometry = new THREE.SphereGeometry( .19, 44, 44 );
 					var material = new THREE.MeshPhongMaterial( {color: rgbToHex(colorIndex[ parseInt(new Date().getTime()/200)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/200)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/200)%colorIndex.length].b)} );
 					var mesh = new THREE.Mesh( geometry, material );
 					mesh.class="object";
@@ -412,7 +412,7 @@
 						}
 						if(controllerNumber==2){
 							mesh.position.copy( controller2.position );
-							mesh.position.z=(mesh.position.z*16)-.05;
+							mesh.position.z=(mesh.position.z*16)-.005;
 							mesh.position.x=(mesh.position.x*12);
 							mesh.position.y=(mesh.position.y*12)-6.75;							
 						}
