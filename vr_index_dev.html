@@ -130,7 +130,7 @@
 				document.body.appendChild( VRButton.createButton( renderer ) );
 
 				colorIndex=createColorIndex();
-				addObject(0,0,0,false,1);
+				addObject(0,0,0,false,1,"select");
 			}
 
 			function initRenderer(){
@@ -160,18 +160,24 @@
 				function onSelectEnd() {
 					this.userData.isSelecting = false;
 				}
+				function onSqueezeStart() {
+					this.userData.isSqueezing = true;
+				}
+				function onSqueezeEnd() {
+					this.userData.isSqueezing = false;
+				}
 
 				controller = renderer.xr.getController( 0 );
 				controller.addEventListener( 'selectstart', onSelectStart );
 				controller.addEventListener( 'selectend', onSelectEnd );
-				controller.addEventListener( 'squeezestart', onSelectStart );
-				controller.addEventListener( 'squeezeend', onSelectEnd );
+				controller.addEventListener( 'squeezestart', onSqueezeStart );
+				controller.addEventListener( 'squeezeend', onSqueezeEnd );
 
 				controller2 = renderer.xr.getController( 1 );
 				controller2.addEventListener( 'selectstart', onSelectStart );
 				controller2.addEventListener( 'selectend', onSelectEnd );
-				controller2.addEventListener( 'squeezestart', onSelectStart );
-				controller2.addEventListener( 'squeezeend', onSelectEnd );
+				controller2.addEventListener( 'squeezestart', onSqueezeStart );
+				controller2.addEventListener( 'squeezeend', onSqueezeEnd );
 
 				controller.addEventListener( 'connected', function ( event ) {
 					this.add( buildController( event.data ) );
@@ -260,10 +266,16 @@
 			
 			function render() {
 				if ( controller.userData.isSelecting === true ){
-					addObject(0,0,0,false,1);
+					addObject(0,0,0,false,1,"select");
 				}
 				if ( controller2.userData.isSelecting === true ){
-					addObject(0,0,0,false,2);
+					addObject(0,0,0,false,2,"select");
+				}
+				if ( controller.userData.isSqueezing === true ){
+					addObject(0,0,0,false,1,"squeeze");
+				}
+				if ( controller2.userData.isSqueezing === true ){
+					addObject(0,0,0,false,2,"squeeze");
 				}
 				for(var x=0; x<scene.children.length; x++){
 					if(scene.children[x].class=="object"){
@@ -382,12 +394,17 @@
 				return(colorIndex);
 			}
 
-			function addObject(x,y,z,isMirror,controllerNumber){
+			function addObject(x,y,z,isMirror,controllerNumber,button){
 
 				var mesh=init();
 
 				function init(){
-					var geometry = new THREE.SphereGeometry( .19, 44, 44 );
+					if(button=="squeeze"){
+						var radius=.28;
+					}else{
+						var radius=.19;
+					}
+					var geometry = new THREE.SphereGeometry( radius, 44, 44 );
 					var material = new THREE.MeshPhongMaterial( {color: rgbToHex(colorIndex[ parseInt(new Date().getTime()/200)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/200)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/200)%colorIndex.length].b)} );
 					var mesh = new THREE.Mesh( geometry, material );
 					mesh.class="object";
