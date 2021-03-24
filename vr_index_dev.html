@@ -407,13 +407,13 @@
 						if(controllerNumber==1){
 							mesh.position.copy( controller.position );
 							mesh.position.z=(mesh.position.z*12)-4.5;
-							mesh.position.x*=12;
+							mesh.position.x=(mesh.position.x*12)-4;
 							mesh.position.y=(mesh.position.y*12)-3.5;
 						}
 						if(controllerNumber==2){
 							mesh.position.copy( controller2.position );
 							mesh.position.z=(mesh.position.z*12)-4.5;
-							mesh.position.x*=12;
+							mesh.position.x=(mesh.position.x*12)+4;
 							mesh.position.y=(mesh.position.y*12)-3.5;							
 						}
 						addObject(mesh.position.x,mesh.position.y,mesh.position.z,true,controllerNumber)
