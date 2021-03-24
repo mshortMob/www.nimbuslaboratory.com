@@ -118,6 +118,9 @@
 				container = document.createElement( 'div' );
 				document.body.appendChild( container );
 				scene = new THREE.Scene();
+
+				scene.fog = new THREE.Fog(0xFFFFFF, 10, 100);
+
 				scene.add(createHemisphereMap());
 				initCameraAndLights();
 				raycaster = new THREE.Raycaster();
