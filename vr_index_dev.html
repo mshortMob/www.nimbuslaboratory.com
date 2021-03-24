@@ -406,13 +406,13 @@
 					if(x==0 && y==0 && z==0 && isMirror==false){
 						if(controllerNumber==1){
 							mesh.position.copy( controller.position );
-							mesh.position.z=(mesh.position.z*12)-.25;
+							mesh.position.z=(mesh.position.z*16)-.005;
 							mesh.position.x=(mesh.position.x*12);
 							mesh.position.y=(mesh.position.y*12)-6.75;
 						}
 						if(controllerNumber==2){
 							mesh.position.copy( controller2.position );
-							mesh.position.z=(mesh.position.z*12)-.25;
+							mesh.position.z=(mesh.position.z*16)-.05;
 							mesh.position.x=(mesh.position.x*12);
 							mesh.position.y=(mesh.position.y*12)-6.75;							
 						}
