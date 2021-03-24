@@ -404,7 +404,7 @@
 						var material = new THREE.MeshPhongMaterial( {color: rgbToHex(colorIndex[ parseInt(new Date().getTime()/200)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/200)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/200)%colorIndex.length].b)} );
 					}else{
 						var radius=.19;
-						var material = new THREE.MeshPhongMaterial( {color: rgbToHex(colorIndex[ parseInt(new Date().getTime()/200)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/50)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/200)%colorIndex.length].b)} );
+						var material = new THREE.MeshPhongMaterial( {color: rgbToHex(colorIndex[ parseInt(new Date().getTime()/50)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/50)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/50)%colorIndex.length].b)} );
 					}
 					var geometry = new THREE.SphereGeometry( radius, 44, 44 );
 					var mesh = new THREE.Mesh( geometry, material );
@@ -417,7 +417,7 @@
 						mesh.lifetime=6000;
 					}else{
 						mesh.velocity.set(0,0,.015);
-						mesh.lifetime=8000;
+						mesh.lifetime=6000;
 					}
 					return mesh;
 
