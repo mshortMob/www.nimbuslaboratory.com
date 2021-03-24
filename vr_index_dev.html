@@ -393,6 +393,8 @@
 					mesh.class="object";
 					mesh.lifetime=6000;
 					mesh.createTime=new Date().getTime();
+					mesh.velocity=new THREE.Vector3();
+					mesh.velocity.set(0,0,.05)
 					return mesh;
 
 				}
@@ -402,6 +404,10 @@
 							scene.remove(this);
 							this.geometry.dispose();
 							this.material.dispose();
+					}else{
+						this.position.x+=this.velocity.x;
+						this.position.y+=this.velocity.y;
+						this.position.z+=this.velocity.z;
 					}
 				}
 
