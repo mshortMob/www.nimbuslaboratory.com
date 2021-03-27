@@ -102,8 +102,9 @@
 
 			const clock = new THREE.Clock();
 			let container;
-			let camera, scene, raycaster, renderer;
+			let camera, scene, raycaster, renderer, user;
 			let room;
+			let controlsGroup;
 			let controller, controller2, controllerGrip, controllerGrip2;
 			let colorIndex;
 			let INTERSECTED;
@@ -118,10 +119,11 @@
 				container = document.createElement( 'div' );
 				document.body.appendChild( container );
 				scene = new THREE.Scene();
-
-				scene.fog = new THREE.Fog(0x000022, 10, 100);
-
+				// scene.fog = new THREE.Fog(0x000000, 0, 65);
 				scene.add(createHemisphereMap());
+				// addBackgroundSprites();
+				// planeBufferTest();
+				addControlPanel();
 				initCameraAndLights();
 				raycaster = new THREE.Raycaster();
 				initRenderer();
@@ -130,9 +132,69 @@
 				document.body.appendChild( VRButton.createButton( renderer ) );
 
 				colorIndex=createColorIndex();
-				addObject(0,0,0,false,1,"select");
+				addObject(0,0,0,false,1,"select2");
 			}
 
+			function planeBufferTest(){
+				const geometry = new THREE.BufferGeometry();
+				const indices = [];
+				const vertices = [];
+				const normals = [];
+				const colors = [];
+				const size = 1000;
+				const segments = 50;
+				const halfSize = size / 2;
+				const segmentSize = size / segments;
+
+				// generate vertices, normals and color data for a simple grid geometry
+				for ( let i = 0; i <= segments; i ++ ) {
+					const y = ( i * segmentSize ) - halfSize;
+					for ( let j = 0; j <= segments; j ++ ) {
+						const x = ( j * segmentSize ) - halfSize;
+						vertices.push( x, - y, 1.*Math.random() );
+						normals.push( 0, 0, 1 );
+						const r = ( x / size ) + 0.5;
+						const g = ( y / size ) + 0.5;
+						colors.push( r, g, 1 );
+					}
+
+				}
+
+				// generate indices (data for element array buffer)
+				for ( let i = 0; i < segments; i ++ ) {
+					for ( let j = 0; j < segments; j ++ ) {
+						const a = i * ( segments + 1 ) + ( j + 1 );
+						const b = i * ( segments + 1 ) + j;
+						const c = ( i + 1 ) * ( segments + 1 ) + j;
+						const d = ( i + 1 ) * ( segments + 1 ) + ( j + 1 );
+						// generate two faces (triangles) per iteration
+						indices.push( a, b, d ); // face one
+						indices.push( b, c, d ); // face two
+					}
+				}
+
+				geometry.setIndex( indices );
+				geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
+				geometry.setAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
+				geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
+
+				// const material = new THREE.MeshPhongMaterial( {
+				// 	side: THREE.DoubleSide,
+				// 	vertexColors: true
+				// } );
+				var material = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/grass2.jpg' ), opacity: .45, transparent:true, fog: true });
+				material.map.offset.set( 0, 0 );
+				material.map.repeat.set( 16, 16 );
+				material.map.wrapS=THREE.MirroredRepeatWrapping;
+				material.map.wrapT=THREE.MirroredRepeatWrapping;
+
+				var mesh = new THREE.Mesh( geometry, material );
+				mesh.position.set(0,0,-2)
+				mesh.rotateX(Math.PI * 0.5);
+
+				scene.add( mesh );
+			}
+			
 			function initRenderer(){
 				renderer = new THREE.WebGLRenderer( { antialias: true } );
 				renderer.setPixelRatio( window.devicePixelRatio );
@@ -143,14 +205,19 @@
 			}
 
 			function initCameraAndLights(){
+				user = new THREE.Group();
+				user.position.set(0,0,0);
 				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 100 );
 				camera.position.set( 0, 1.6, 3);
-				scene.add( camera );
+				user.add( camera );
+				scene.add( user );
 
 				scene.add( new THREE.HemisphereLight( 0x606060, 0x404040 ) );
 				const light = new THREE.DirectionalLight( 0xffffff );
 				light.position.set( 1, 1, 1 ).normalize();
 				scene.add( light );
+
+				console.log(camera.getWorldQuaternion())
 			}
 
 			function initControllers(){
@@ -197,15 +264,47 @@
 				scene.add( controllerGrip2 );
 			}
 
+			function addControlPanel(){
+
+				function addPlaneButton(x,y,w,h,color,name){
+					var geometry = new THREE.PlaneGeometry( w, h );
+					var material = new THREE.MeshBasicMaterial( {color: color, side: THREE.DoubleSide} );
+					var plane = new THREE.Mesh( geometry, material );
+					plane.position.set(x,y,-2);
+					plane.name=name;
+					plane.onSelect=function(INTERSECTED){
+						if(this.name=="pattern1"){
+							user.rotation.y-=.005;
+						}
+						if(this.name=="pattern2"){
+							user.rotation.y+=.005;
+						}
+						INTERSECTED.material.color={"r":.05, "g":.05, "b":.3}
+						for(var x=0; x<controlsGroup.children.length; x++){
+							controlsGroup.children[x].material.color={"r":.13, "g":.13, "b":.13}
+						}
+					}				
+					return plane;
+				}
+
+				controlsGroup=new THREE.Group();
+				controlsGroup.add( addPlaneButton(.3,1,.5,.5,0x222222,"pattern1") );
+				controlsGroup.add( addPlaneButton(-.3,1,.5,.5,0x222222,"pattern2") );
+				controlsGroup.rotateX(6.28/4+6.28/8);
+				controlsGroup.position.y=-1.5;
+				controlsGroup.position.z=-6;
+				scene.add(controlsGroup);
+			}
+			
 			function createHemisphereMap(){
 				var radius = 60;
 				var radialSegments = 32;
-				var hsmaterial = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/stars3.jpg' ), opacity: .34, transparent:true });
+				var hsmaterial = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/stars3.jpg' ), opacity: .34, transparent:true, fog: true });
 				var hemiSphereGeom = new THREE.SphereBufferGeometry(radius, radialSegments, Math.round(radialSegments / 4), 0, Math.PI * 2, 0, Math.PI * 0.5);
 				var hemiSphere = new THREE.Mesh(hemiSphereGeom, hsmaterial);
 				var capGeom = new THREE.CircleBufferGeometry(radius, radialSegments);
 				capGeom.rotateX(Math.PI * 0.5);
-				var hfmaterial = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/grass2.jpg' ),  bumpScale:1, bumpMap: new THREE.TextureLoader().load( 'assets/grass2.jpg' ), opacity: .11, transparent:true });
+				var hfmaterial = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/grass2.jpg' ),  bumpScale:1, bumpMap: new THREE.TextureLoader().load( 'assets/grass2.jpg' ), opacity: .095, transparent:true, fog: true });
 				hfmaterial.map.offset.set( 0, 0 );
 				hfmaterial.map.repeat.set( 16, 16 );
 				hfmaterial.map.wrapS=THREE.MirroredRepeatWrapping;
@@ -216,6 +315,61 @@
 				return hemiSphere;
 			}
 
+			function addBackgroundSprites(){
+				var geometry = new THREE.BufferGeometry();
+				var vertices = [];
+				var materials = [];
+
+				var textureLoader = new THREE.TextureLoader();
+
+				var sprite1 = textureLoader.load( 'sprites/sprite2.png' );
+				var sprite2 = textureLoader.load( 'sprites/sprite2.png' );
+				var sprite3 = textureLoader.load( 'sprites/sprite3.png' );
+
+				for ( var i = 0; i < 10000; i ++ ) {
+
+					var x = Math.random() * 1000 - 500;
+					var y = Math.random() * 1000 - 500;
+					var z = Math.random() * 1000 - 500;
+
+					vertices.push( x, y, z );
+
+				}
+
+				geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
+
+				var parameters = [
+					[[ 1.0, 1.0, 1.0 ], sprite1, 30 ],
+					[[ .5, 0.9, 1.0 ], sprite2, 20 ],
+					[[ .6, 1.0, 0.5 ], sprite3, 25 ]
+				];
+
+				for ( var i = 0; i < parameters.length; i ++ ) {
+
+					var color = parameters[ i ][ 0 ];
+					var sprite = parameters[ i ][ 1 ];
+					var size = parameters[ i ][ 2 ];
+
+					materials[ i ] = new THREE.PointsMaterial( { size: size, map: sprite, blending: THREE.AdditiveBlending, depthTest: false, transparent: true } );
+					materials[ i ].color.setHSL( color[ 0 ], color[ 1 ], color[ 2 ] );
+
+					var particles = new THREE.Points( geometry, materials[ i ] );
+
+					particles.rotation.x = Math.random() * 6;
+					particles.rotation.y = Math.random() * 6;
+					particles.rotation.z = Math.random() * 6;
+					particles.class="backgroundParticles";
+					particles.update=function(){
+						var time = Date.now() * 0.00005;
+						this.rotation.x = time/7 * ( i < 4 ? i + 1 : - ( i + 1 ) );
+						this.rotation.y = time/7 * ( i < 4 ? i + 1 : - ( i + 1 ) );
+					}
+
+					scene.add( particles );
+
+				}
+			}
+			
 			function buildController( data ) {
 
 				let geometry, material;
@@ -264,24 +418,50 @@
 				}
 			}
 			
+			function calculateIntersects(){
+				tempMatrix.identity().extractRotation( controller.matrixWorld )
+				raycaster.ray.origin.setFromMatrixPosition( controller.matrixWorld );
+				raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( tempMatrix );
+
+				const intersects = raycaster.intersectObjects( controlsGroup.children );
+				if ( intersects.length > 0 ) {
+					// if ( INTERSECTED != intersects[ 0 ].object ) {
+						// if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+						INTERSECTED = intersects[ 0 ].object;
+						if ( controller.userData.isSelecting === true ){
+							INTERSECTED.onSelect(INTERSECTED);
+						}
+					// }
+				} else {
+					// if(INTERSECTED!=undefined){
+						// INTERSECTED.onDeselect(INTERSECTED)
+					// }
+					INTERSECTED = undefined;
+				}
+			}
+			
 			function render() {
+
+				calculateIntersects();
+
 				if ( controller.userData.isSelecting === true ){
-					addObject(0,0,0,false,1,"select");
+					addObject(0,0,0,false,1,"select1");
 				}
 				if ( controller2.userData.isSelecting === true ){
-					addObject(0,0,0,false,2,"select");
+					addObject(0,0,0,false,2,"select2");
 				}
 				if ( controller.userData.isSqueezing === true ){
-					addObject(0,0,0,false,1,"squeeze");
+					addObject(0,0,0,false,1,"squeeze1");
 				}
 				if ( controller2.userData.isSqueezing === true ){
-					addObject(0,0,0,false,2,"squeeze");
+					addObject(0,0,0,false,2,"squeeze2");
 				}
 				for(var x=0; x<scene.children.length; x++){
-					if(scene.children[x].class=="object"){
+					if(scene.children[x].class=="object" || scene.children[x].class=="backgroundParticles"){
 						scene.children[x].update();
 					}
 				}
+				// camera.rotateY(.001);
 				renderer.render( scene, camera );
 			}
 
@@ -399,28 +579,55 @@
 				var mesh=init();
 
 				function init(){
-					if(button=="squeeze"){
+					if(button=="squeeze2"){
 						var radius=.5;
 						var material = new THREE.MeshPhongMaterial( {color: rgbToHex(colorIndex[ parseInt(new Date().getTime()/200)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/200)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/200)%colorIndex.length].b)} );
-					}else{
+						var geometry = new THREE.SphereGeometry( radius, 44, 44 );
+						var mesh = new THREE.Mesh( geometry, material );
+						mesh.class="object";
+						mesh.createTime=new Date().getTime();	
+						mesh.velocity=new THREE.Vector3();
+						mesh.velocity.set(0,0,.004);
+						mesh.lifetime=7000;				
+					}else if(button=="squeeze1"){
+               			// var spriteTexture=new THREE.TextureLoader().load( "sprites/sprite1.png" );                
+						// var material = new THREE.SpriteMaterial( { map: spriteTexture, fog: true, blending: THREE.AdditiveBlending, depthTest: false, transparent: true, color: rgbToHex(colorIndex[ parseInt(new Date().getTime()/25)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/25)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/25)%colorIndex.length].b) } );
+						// var mesh = new THREE.Sprite( material );
+						var radius=.5;
+						var material = new THREE.MeshPhongMaterial( {color: rgbToHex(colorIndex[ parseInt(new Date().getTime()/400)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/400)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/400)%colorIndex.length].b)} );
+						var geometry = new THREE.BoxGeometry( radius*2, radius*2, radius*2 );
+						var mesh = new THREE.Mesh( geometry, material );
+						mesh.rotateX((new Date().getTime()/400)%6.28)
+						mesh.rotateY((new Date().getTime()/800)%6.28)
+						mesh.class="object";
+						mesh.createTime=new Date().getTime();
+						mesh.velocity=new THREE.Vector3();
+						mesh.velocity.set(0,0,.0088);
+						mesh.lifetime=6000;
+					}else if(button=="select2"){
 						var radius=.19;
-						var material = new THREE.MeshPhongMaterial( {color: rgbToHex(colorIndex[ parseInt(new Date().getTime()/50)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/50)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/50)%colorIndex.length].b)} );
-					}
-					var geometry = new THREE.SphereGeometry( radius, 44, 44 );
-					var mesh = new THREE.Mesh( geometry, material );
-					mesh.class="object";
-					mesh.lifetime=4000;
-					mesh.createTime=new Date().getTime();
-					mesh.velocity=new THREE.Vector3();
-					if(button=="squeeze"){
-						mesh.velocity.set(0,0,.005);
-						mesh.lifetime=6000;
-					}else{
+						var material = new THREE.MeshPhongMaterial( {color: rgbToHex(colorIndex[ parseInt(new Date().getTime()/100)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/100)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/100)%colorIndex.length].b)} );
+						var geometry = new THREE.SphereGeometry( radius, 44, 44 );
+						var mesh = new THREE.Mesh( geometry, material );
+						mesh.class="object";
+						mesh.createTime=new Date().getTime();
+						mesh.velocity=new THREE.Vector3();
 						mesh.velocity.set(0,0,.015);
-						mesh.lifetime=6000;
+						mesh.lifetime=6500;
+					}else if(button=="select1"){
+						var radius=.19;
+						var material = new THREE.MeshPhongMaterial( {color: rgbToHex(colorIndex[ parseInt(new Date().getTime()/150)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/150)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/150)%colorIndex.length].b)} );
+						var geometry = new THREE.BoxGeometry( radius*2, radius*2, radius*2 );
+						var mesh = new THREE.Mesh( geometry, material );
+						mesh.rotateX((new Date().getTime()/300)%6.28)
+						mesh.rotateY((new Date().getTime()/600)%6.28)
+						mesh.class="object";
+						mesh.createTime=new Date().getTime();
+						mesh.velocity=new THREE.Vector3();
+						mesh.velocity.set(0,0,.03);
+						mesh.lifetime=4000;
 					}
 					return mesh;
-
 				}
 
 				mesh.update=function(){
