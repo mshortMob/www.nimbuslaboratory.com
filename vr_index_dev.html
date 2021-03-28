@@ -273,26 +273,41 @@
 					plane.position.set(x,y,-2);
 					plane.name=name;
 					plane.onSelect=function(INTERSECTED){
-						if(this.name=="pattern1"){
+						if ( controller.userData.isSelecting === true ){
+							if(this.name=="pattern1"){
 							user.rotation.y-=.005;
+							}
+							if(this.name=="pattern2"){
+								user.rotation.y+=.005;
+							}
+							if(this.name=="pattern3"){
+								user.position.y+=.005;
+							}
+							if(this.name=="pattern4"){
+								user.position.y-=.005;
+							}
 						}
-						if(this.name=="pattern2"){
-							user.rotation.y+=.005;
-						}
-						INTERSECTED.material.color={"r":.05, "g":.05, "b":.3}
 						for(var x=0; x<controlsGroup.children.length; x++){
 							controlsGroup.children[x].material.color={"r":.13, "g":.13, "b":.13}
 						}
-					}				
+						INTERSECTED.material.color={"r":.05, "g":.05, "b":.3};
+					}
+					plane.onDeselect=function(INTERSECTED){
+						INTERSECTED.material.color={"r":.13, "g":.13, "b":.13}
+					}
 					return plane;
 				}
 
 				controlsGroup=new THREE.Group();
-				controlsGroup.add( addPlaneButton(.3,1,.5,.5,0x222222,"pattern1") );
-				controlsGroup.add( addPlaneButton(-.3,1,.5,.5,0x222222,"pattern2") );
-				controlsGroup.rotateX(6.28/4+6.28/8);
-				controlsGroup.position.y=-1.5;
-				controlsGroup.position.z=-6;
+				controlsGroup.add( addPlaneButton(.6,1,.5,.5,0x222222,"pattern1") );
+				controlsGroup.add( addPlaneButton(-.6,1,.5,.5,0x222222,"pattern2") );
+				controlsGroup.add( addPlaneButton(0,1.6,.5,.5,0x222222,"pattern3") );
+				controlsGroup.add( addPlaneButton(0,.4,.5,.5,0x222222,"pattern4") );
+
+				controlsGroup.rotateX(6.28/4);
+				controlsGroup.position.y=-2.5;
+				controlsGroup.position.z=-3.5;
+				controlsGroup.scale.set(.5,.5,.5);
 				scene.add(controlsGroup);
 			}
 			
@@ -428,14 +443,12 @@
 					// if ( INTERSECTED != intersects[ 0 ].object ) {
 						// if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
 						INTERSECTED = intersects[ 0 ].object;
-						if ( controller.userData.isSelecting === true ){
-							INTERSECTED.onSelect(INTERSECTED);
-						}
+						INTERSECTED.onSelect(INTERSECTED);
 					// }
 				} else {
-					// if(INTERSECTED!=undefined){
-						// INTERSECTED.onDeselect(INTERSECTED)
-					// }
+					if(INTERSECTED!=undefined){
+						INTERSECTED.onDeselect(INTERSECTED)
+					}
 					INTERSECTED = undefined;
 				}
 			}
