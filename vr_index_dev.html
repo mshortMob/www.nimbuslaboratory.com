@@ -275,16 +275,16 @@
 					plane.name=name;
 					plane.onSelect=function(INTERSECTED){
 						if ( controller.userData.isSelecting === true ){
-							if(this.name=="pattern1"){
+							if(this.name=="left"){
 							user.rotation.y-=.005;
 							}
-							if(this.name=="pattern2"){
+							if(this.name=="right"){
 								user.rotation.y+=.005;
 							}
-							if(this.name=="pattern3"){
+							if(this.name=="up"){
 								yOffeset+=.005;
 							}
-							if(this.name=="pattern4"){
+							if(this.name=="down"){
 								yOffeset-=.005;
 							}
 						}
@@ -300,10 +300,10 @@
 				}
 
 				controlsGroup=new THREE.Group();
-				controlsGroup.add( addPlaneButton(.6,1,.5,.5,0x222222,"pattern1") );
-				controlsGroup.add( addPlaneButton(-.6,1,.5,.5,0x222222,"pattern2") );
-				controlsGroup.add( addPlaneButton(0,1.6,.5,.5,0x222222,"pattern3") );
-				controlsGroup.add( addPlaneButton(0,.4,.5,.5,0x222222,"pattern4") );
+				controlsGroup.add( addPlaneButton(.6,1,.5,.5,0x222222,"left") );
+				controlsGroup.add( addPlaneButton(-.6,1,.5,.5,0x222222,"right") );
+				controlsGroup.add( addPlaneButton(0,1.6,.5,.5,0x222222,"up") );
+				controlsGroup.add( addPlaneButton(0,.4,.5,.5,0x222222,"down") );
 
 				controlsGroup.rotateX(6.28/4);
 				controlsGroup.position.y=-2.5;
