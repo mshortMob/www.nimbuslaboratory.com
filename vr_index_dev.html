@@ -121,7 +121,7 @@
 				document.body.appendChild( container );
 				scene = new THREE.Scene();
 				// scene.fog = new THREE.Fog(0x000000, 0, 65);
-				scene.add(createHemisphereMap());
+				// scene.add(createHemisphereMap());
 				// addBackgroundSprites();
 				// planeBufferTest();
 				addControlPanel();
@@ -282,10 +282,10 @@
 								user.rotation.y+=.005;
 							}
 							if(this.name=="up"){
-								yOffeset+=.005;
+								yOffeset+=.05;
 							}
 							if(this.name=="down"){
-								yOffeset-=.005;
+								yOffeset-=.05;
 							}
 						}
 						for(var x=0; x<controlsGroup.children.length; x++){
