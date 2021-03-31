@@ -68,8 +68,25 @@
 				scene.add( light );
 
 				const texture = new THREE.TextureLoader().load( 'assets/paul.jpg' );
-				const geometry = new THREE.PlaneBufferGeometry(  200, 200, 32  );
-				const material = new THREE.MeshStandardMaterial( { map: texture, side:THREE.DoubleSide, displacementScale: 50, displacementMap: new THREE.TextureLoader().load( 'assets/noise.jpg' ) } );
+				const geometry = new THREE.PlaneBufferGeometry(  200, 200, 1, 1  );
+
+				var positionAttribute = geometry.attributes.position;
+				console.log( positionAttribute );
+				positionAttribute.setY(0, positionAttribute.getY(0)+40);
+				positionAttribute.setX(0, positionAttribute.getX(0)-40);
+				for(var i=0; i<positionAttribute.count; i++){
+					// positionAttribute.setX(i, positionAttribute.getX(i)+40);
+					console.log(positionAttribute.getX(i)+", "+positionAttribute.getY(i));
+
+					const circle = new THREE.Mesh( new THREE.CircleGeometry( 15, 32 ) , new THREE.MeshBasicMaterial( { color: 0x0000ff } ) );
+					circle.position.x=positionAttribute.getX(i);
+					circle.position.y=positionAttribute.getY(i);
+					circle.position.z+=1;
+					scene.add( circle );
+				}
+
+
+				const material = new THREE.MeshStandardMaterial( { map: texture, side:THREE.DoubleSide, displacementScale: 0, displacementMap: new THREE.TextureLoader().load( 'assets/noise.jpg' ) } );
 				mesh = new THREE.Mesh( geometry, material );
 				scene.add( mesh );
 
@@ -89,8 +106,8 @@
 
 			function animate() {
 				requestAnimationFrame( animate );
-				mesh.rotation.x += 0.005;
-				mesh.rotation.y += 0.01;
+				// mesh.rotation.x += 0.005;
+				// mesh.rotation.y += 0.01;
 				renderer.render( scene, camera );
 			}
 		</script>
