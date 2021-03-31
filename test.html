@@ -69,7 +69,7 @@
 
 				const texture = new THREE.TextureLoader().load( 'assets/paul.jpg' );
 				const geometry = new THREE.PlaneBufferGeometry(  200, 200, 32  );
-				const material = new THREE.MeshStandardMaterial( { map: texture, side:THREE.DoubleSide } );
+				const material = new THREE.MeshStandardMaterial( { map: texture, side:THREE.DoubleSide, displacementScale: 50, displacementMap: new THREE.TextureLoader().load( 'assets/noise.jpg' ) } );
 				mesh = new THREE.Mesh( geometry, material );
 				scene.add( mesh );
 
