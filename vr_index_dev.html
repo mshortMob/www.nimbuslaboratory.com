@@ -701,9 +701,13 @@
 
 					function initBrush2(){
 						if(button=="squeeze2"){
-							var radius1=.46;
+							var radius1=.42;
 							var radius2=.5;
-							var material = new THREE.MeshPhongMaterial( {color: 0xff0000, alpha:.9, side: THREE.DoubleSide} );
+							if((new Date().getTime()/8000)%3>1.5){
+								var material = new THREE.MeshPhongMaterial( {color: 0xff0000, alpha:.9, side: THREE.DoubleSide} );
+							}else{
+								var material = new THREE.MeshPhongMaterial( {color: 0x0000ff, alpha:.9, side: THREE.DoubleSide} );
+							}
 							var geometry = new THREE.RingGeometry( radius1, radius2, 6 );
 							var mesh = new THREE.Mesh( geometry, material );
 							mesh.class="object";
@@ -716,37 +720,46 @@
 							// var spriteTexture=new THREE.TextureLoader().load( "sprites/sprite1.png" );                
 							// var material = new THREE.SpriteMaterial( { map: spriteTexture, fog: true, blending: THREE.AdditiveBlending, depthTest: false, transparent: true, color: rgbToHex(colorIndex[ parseInt(new Date().getTime()/25)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/25)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/25)%colorIndex.length].b) } );
 							// var mesh = new THREE.Sprite( material );
-							var radius1=.46;
-							var radius2=.5;
-							var material = new THREE.MeshPhongMaterial( {color: 0x00fff0, alpha:.9, side: THREE.DoubleSide} );
-							var geometry = new THREE.RingGeometry( radius1, radius2, 1 );
+							var radius1=.75;
+							var radius2=.9;
+							if((new Date().getTime()/7000)%3>1.5){
+								var material = new THREE.MeshPhongMaterial( {color: 0xffff00, alpha:.9, side: THREE.DoubleSide} );
+							}else{
+								var material = new THREE.MeshPhongMaterial( {color: 0x00ff00, alpha:.9, side: THREE.DoubleSide} );
+							}							var geometry = new THREE.RingGeometry( radius1, radius2, 1 );
 							var mesh = new THREE.Mesh( geometry, material );
 							mesh.rotateX((new Date().getTime()/400)%6.28)
-							mesh.rotateY((new Date().getTime()/800)%6.28)
+							mesh.rotateZ(.523)
 							mesh.class="object";
 							mesh.createTime=new Date().getTime();
 							mesh.velocity=new THREE.Vector3();
-							mesh.velocity.set(0,0,-.008);
+							mesh.velocity.set(0,0,-.08);
 							mesh.lifetime=6000;
 						}else if(button=="select2"){
-							var radius1=.2;
+							var radius1=.15;
 							var radius2=.25;
-							var material = new THREE.MeshPhongMaterial( {color: 0x0fff00, alpha:.9, side: THREE.DoubleSide} );
+							if((new Date().getTime()/8000)%3>1.5){
+								var material = new THREE.MeshPhongMaterial( {color: 0x0fff00, alpha:.9, side: THREE.DoubleSide} );
+							}else{
+								var material = new THREE.MeshPhongMaterial( {color: 0xff00ff, alpha:.9, side: THREE.DoubleSide} );
+							}
 							var geometry = new THREE.RingGeometry( radius1, radius2, 1 );
 							var mesh = new THREE.Mesh( geometry, material );
-							mesh.rotateY((new Date().getTime()/250)%6.28)
+							mesh.rotateX((new Date().getTime()/200)%6.28)
+							mesh.rotateZ(0.523);
 							mesh.class="object";
 							mesh.createTime=new Date().getTime();
 							mesh.velocity=new THREE.Vector3();
 							mesh.velocity.set(0,0,.015);
 							mesh.lifetime=6500;
 						}else if(button=="select1"){
-							var radius1=.2;
+							var radius1=.19;
 							var radius2=.25;
-							var material = new THREE.MeshPhongMaterial( {color: 0x0000ff, alpha:.9, side: THREE.DoubleSide} );
-							var geometry = new THREE.RingGeometry( radius1, radius2, 32 );
+							var material = new THREE.MeshPhongMaterial( {color: rgbToHex(colorIndex[ parseInt(new Date().getTime()/100)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/100)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/100)%colorIndex.length].b), alpha:1, side: THREE.DoubleSide} );
+							var geometry = new THREE.RingGeometry( radius1, radius2, 12 );
 							var mesh = new THREE.Mesh( geometry, material );
 							mesh.rotateX((new Date().getTime()/250)%6.28)
+							mesh.rotateZ(0.523);
 							mesh.class="object";
 							mesh.createTime=new Date().getTime();
 							mesh.velocity=new THREE.Vector3();
