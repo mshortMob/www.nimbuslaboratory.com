@@ -110,7 +110,7 @@
 			let INTERSECTED;
 			var yOffeset=0;
 			if(window.location.href.indexOf("localhost")!=-1){
-				var brush="brush2";
+				var brush="brush3";
 			}else{
 				var brush="brush1";
 			}
@@ -218,9 +218,9 @@
 				user.add( camera );
 				scene.add( user );
 
-				if(window.location.href.indexOf("localhost")!=-1){
-					user.rotateX(-1);
-				}
+				// if(window.location.href.indexOf("localhost")!=-1){
+				// 	user.rotateX(-1);
+				// }
 
 				scene.add( new THREE.HemisphereLight( 0x606060, 0x404040 ) );
 				const light = new THREE.DirectionalLight( 0xffffff );
@@ -702,8 +702,8 @@
 
 					function initBrush2(){
 						if(button=="squeeze2"){
-							var radius1=.42;
-							var radius2=.5;
+							var radius1=.9;
+							var radius2=1.04;
 							if((new Date().getTime()/8000)%3>1.5){
 								var material = new THREE.MeshPhongMaterial( {color: 0xff0000, alpha:.9, side: THREE.DoubleSide} );
 							}else{
@@ -721,8 +721,8 @@
 							// var spriteTexture=new THREE.TextureLoader().load( "sprites/sprite1.png" );                
 							// var material = new THREE.SpriteMaterial( { map: spriteTexture, fog: true, blending: THREE.AdditiveBlending, depthTest: false, transparent: true, color: rgbToHex(colorIndex[ parseInt(new Date().getTime()/25)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/25)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/25)%colorIndex.length].b) } );
 							// var mesh = new THREE.Sprite( material );
-							var radius1=.75;
-							var radius2=.9;
+							var radius1=1.;
+							var radius2=1.2;
 							if((new Date().getTime()/7000)%3>1.5){
 								var material = new THREE.MeshPhongMaterial( {color: 0xffff00, alpha:.9, side: THREE.DoubleSide} );
 							}else{
