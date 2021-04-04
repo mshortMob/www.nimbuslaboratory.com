@@ -110,11 +110,12 @@
 			let INTERSECTED;
 			var yOffeset=0;
 			if(window.location.href.indexOf("localhost")!=-1){
-				var brush="brush2";
+				var brush="brush3";
 			}else{
 				var brush="brush1";
 			}
 			const tempMatrix = new THREE.Matrix4();
+			var dotsTexture=new THREE.TextureLoader().load( 'assets/dots.jpg' );
 
 			init();
 			animate();
@@ -325,7 +326,7 @@
 								}
 							}
 						}
-						if(this.name=="brush1" || this.name=="brush2"){
+						if(this.name=="brush1" || this.name=="brush2" || this.name=="brush3"){
 							if(brush==this.name){
 								INTERSECTED.material.color={"r":.05, "g":.5, "b":.15};
 							}else{
@@ -341,11 +342,12 @@
 				controlsGroup.add( addPlaneButton(-.6,1,0,.5,.5,0x222222,"right") );
 				controlsGroup.add( addPlaneButton(0,1.6,0,.5,.5,0x222222,"up") );
 				controlsGroup.add( addPlaneButton(0,.4,0,.5,.5,0x222222,"down") );
-				var brush1PlaneButton=addPlaneButton(1.8,.5,0,.5,.5,0x222222,"brush1");
+				var brush1PlaneButton=addPlaneButton(1.8,.4,0,.5,.5,0x222222,"brush1");
 				INTERSECTED=brush1PlaneButton;
 				brush1PlaneButton.onDeselect(brush1PlaneButton);
 				controlsGroup.add(brush1PlaneButton);
-				controlsGroup.add( addPlaneButton(1.8,1.3,0,.5,.5,0x222222,"brush2") );
+				controlsGroup.add( addPlaneButton(1.8,1.005,0,.5,.5,0x222222,"brush2") );
+				controlsGroup.add( addPlaneButton(1.8,1.6,0,.5,.5,0x222222,"brush3") );
 
 				controlsGroup.rotateX(6.28/4);
 				controlsGroup.position.x=-.4;
@@ -701,8 +703,8 @@
 
 					function initBrush2(){
 						if(button=="squeeze2"){
-							var radius1=.42;
-							var radius2=.5;
+							var radius1=.9;
+							var radius2=1.04;
 							if((new Date().getTime()/8000)%3>1.5){
 								var material = new THREE.MeshPhongMaterial( {color: 0xff0000, alpha:.9, side: THREE.DoubleSide} );
 							}else{
@@ -720,8 +722,8 @@
 							// var spriteTexture=new THREE.TextureLoader().load( "sprites/sprite1.png" );                
 							// var material = new THREE.SpriteMaterial( { map: spriteTexture, fog: true, blending: THREE.AdditiveBlending, depthTest: false, transparent: true, color: rgbToHex(colorIndex[ parseInt(new Date().getTime()/25)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/25)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/25)%colorIndex.length].b) } );
 							// var mesh = new THREE.Sprite( material );
-							var radius1=.75;
-							var radius2=.9;
+							var radius1=1.;
+							var radius2=1.2;
 							if((new Date().getTime()/7000)%3>1.5){
 								var material = new THREE.MeshPhongMaterial( {color: 0xffff00, alpha:.9, side: THREE.DoubleSide} );
 							}else{
@@ -769,15 +771,63 @@
 						return mesh;
 					}
 
+					function initBrush3(){
+						if(button.indexOf("select")!="-1" ){
+							var radius=.02;
+							var colorValue=rgbToHex(2*colorIndex[ parseInt(new Date().getTime()/20)%colorIndex.length].r, 2*colorIndex[ parseInt(new Date().getTime()/20)%colorIndex.length].g, 2*colorIndex[ parseInt(new Date().getTime()/20)%colorIndex.length].b);
+							var material = new THREE.MeshPhongMaterial( {color: colorValue, side:THREE.DoubleSide, transparent:true, alphaMap: dotsTexture, opacity:1.5 } );
+							var geometry = new THREE.SphereGeometry( radius, 44, 44 );
+							var mesh = new THREE.Mesh( geometry, material );
+							mesh.class="object";
+							mesh.isFirework=true;
+							mesh.createTime=new Date().getTime();	
+							mesh.velocity=new THREE.Vector3();
+							mesh.velocity.set(0.,0.,-.46+(.01*Math.random()) );
+							mesh.scaleRate=1.7;
+							mesh.alphaRate=.04;
+							mesh.lifetime=1000+(Math.random()*500);
+							mesh.scaleTime=mesh.lifetime-700;				
+							return mesh;
+						}
+						if(button.indexOf("squeeze")!="-1" ){
+							var radius=.05;
+							var colorValue=rgbToHex(colorIndex[ parseInt(new Date().getTime()/5)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/5)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/5)%colorIndex.length].b);
+							var material = new THREE.MeshPhongMaterial( {color: colorValue, side:THREE.DoubleSide, transparent:true, alphaMap: dotsTexture } );
+							var geometry = new THREE.SphereGeometry( radius, 44, 44 );
+							var mesh = new THREE.Mesh( geometry, material );
+							mesh.class="object";
+							mesh.isFirework=true;
+							mesh.createTime=new Date().getTime();	
+							mesh.velocity=new THREE.Vector3();
+							mesh.velocity.set(0.,0.,-.28+(.01*Math.random()) );
+							mesh.scaleRate=.8;
+							mesh.alphaRate=.0068;
+							mesh.lifetime=3000+(Math.random()*1600);
+							mesh.scaleTime=mesh.lifetime-1600;				
+							mesh.materialNee
+							return mesh;
+						}
+					}
+
 					if(brush=="brush1"){
 						return initBrush1();
 					}
 					if(brush=="brush2"){
 						return initBrush2();
+					}
+					if(brush=="brush3"){
+						return initBrush3();
 					}				
 				}
 
 				mesh.update=function(){
+					if(this.isFirework==true){
+						if( Math.abs(this.createTime-(new Date().getTime())) > this.scaleTime ){
+							mesh.velocity.set(0.,0.,0.);
+							this.scale.set(this.scale.x+this.scaleRate,this.scale.y+this.scaleRate,this.scale.z+this.scaleRate)
+							this.material.opacity-=this.alphaRate;
+						}
+					}
 					if( Math.abs(this.createTime-(new Date().getTime())) > this.lifetime ){
 							scene.remove(this);
 							this.geometry.dispose();
@@ -791,19 +841,31 @@
 
 				mesh.setInitialPositionWithMirroring=function(){
 					if(x==0 && y==0 && z==0 && isMirror==false){
-						if(controllerNumber==1){
-							mesh.position.copy( controller.position );
-							mesh.position.z=(mesh.position.z*20)+.25;
-							mesh.position.x=(mesh.position.x*12);
-							mesh.position.y=(mesh.position.y*12)-6.25+yOffeset;
+						if(brush=="brush1" || brush=="brush2" ){
+							if(controllerNumber==1){
+								mesh.position.copy( controller.position );
+								mesh.position.z=(mesh.position.z*20)+.25;
+								mesh.position.x=(mesh.position.x*12);
+								mesh.position.y=(mesh.position.y*12)-6.25+yOffeset;
+							}
+							if(controllerNumber==2){
+								mesh.position.copy( controller2.position );
+								mesh.position.z=(mesh.position.z*20)+.25;
+								mesh.position.x=(mesh.position.x*12);
+								mesh.position.y=(mesh.position.y*12)-6.25+yOffeset;							
+							}
+							addObject(mesh.position.x,mesh.position.y,mesh.position.z,true,controllerNumber,button)
+						} 
+						if(brush=="brush3"){
+							if(controllerNumber==1){
+								mesh.position.copy( controller.position );
+								mesh.velocity.applyQuaternion( controller.quaternion )
+							}
+							if(controllerNumber==2){
+								mesh.position.copy( controller2.position );	
+								mesh.velocity.applyQuaternion( controller2.quaternion )				
+							}							
 						}
-						if(controllerNumber==2){
-							mesh.position.copy( controller2.position );
-							mesh.position.z=(mesh.position.z*20)+.25;
-							mesh.position.x=(mesh.position.x*12);
-							mesh.position.y=(mesh.position.y*12)-6.25+yOffeset;							
-						}
-						addObject(mesh.position.x,mesh.position.y,mesh.position.z,true,controllerNumber,button)
 					}else{
 						mesh.position.set(-x,y,z);
 					}
