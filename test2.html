@@ -1,0 +1,225 @@
+<html>
+	<head>
+		<title>ShaderMapper</title>
+		<style>
+			body{
+			    margin:0px;
+				background-color:black;
+			}	
+			video{
+				opacity: 1;
+				width:100%;
+				height:100%;
+				top:0px;
+				left:0px;
+				z-index:-1;
+				transform:scale(-1,1);
+				position:fixed;
+				float:left;
+				object-fit:fill;
+			}
+			canvas{
+				opacity: 1;
+				width:100%;
+				height:100%;
+				top:0px;
+				left:0px;
+				z-index:10;
+				transform:scale(1,1);
+				position:fixed;
+				float:left;
+				object-fit:fill;
+				/* cursor: none; */
+			}
+			video{
+				opacity: 1;
+				width:100%;
+				height:100%;
+				top:0px;
+				left:0px;
+				z-index:-1;
+				transform:scale(-1,1);
+				position:fixed;
+				float:left;
+				object-fit:fill;
+			}
+		</style>
+	</head>
+	<body>
+
+		<script id="vshader" type="x-shader/x-vertex">
+			precision highp float;
+			uniform mat4 modelViewMatrix;
+			uniform mat4 projectionMatrix;
+			uniform float time;
+	
+			attribute vec3 position;
+			attribute vec2 uv;
+			attribute vec3 translate;
+	
+			varying vec2 vUv;
+			varying float vScale;
+	
+			void main() {
+				vec3 trTime = vec3(translate.x+time/3.,translate.y,translate.z);
+
+				vScale= sin( trTime.x * 2.1 ) + sin( trTime.y * 3.2 ) + sin( trTime.z * 4.3 );
+
+				vec4 mvPosition = modelViewMatrix * vec4( translate, 1.0 );
+			    float scale =  60.0;
+				mvPosition.xyz += position * scale;
+				vUv = uv;
+				gl_Position = projectionMatrix * mvPosition;
+	
+			}
+		</script>
+		<script id="fshader" type="x-shader/x-fragment">
+			precision highp float;
+	
+			uniform sampler2D map;
+	
+			varying vec2 vUv;
+			varying float vScale;
+	
+			// HSL to RGB Convertion helpers
+			vec3 HUEtoRGB(float H){
+				H = mod(H,1.0);
+				float R = abs(H * 6.0 - 3.0) - 1.0;
+				float G = 2.0 - abs(H * 6.0 - 2.0);
+				float B = 2.0 - abs(H * 6.0 - 4.0);
+				return clamp(vec3(R,G,B),0.0,1.0);
+			}
+	
+			vec3 HSLtoRGB(vec3 HSL){
+				vec3 RGB = HUEtoRGB(HSL.x);
+				float C = (1.0 - abs(2.0 * HSL.z - 1.0)) * HSL.y;
+				return (RGB - 0.5) * C + HSL.z;
+			}
+	
+			void main() {
+				vec3 temp=HSLtoRGB(vec3(vScale/5.0, 1.0, 0.5));
+				gl_FragColor = vec4( vec3(vScale/5.0, 1.0, 0.5), (temp.r+temp.g+temp.b)/3.0 );
+	
+				//if ( diffuseColor.w < 0.5 ) discard;
+			}
+		</script>
+
+		<script type="module">
+			import * as THREE from 'https://threejs.org/build/three.module.js';
+	
+			import Stats from 'https://threejs.org/examples/jsm/libs/stats.module.js';
+	
+			let container, stats;
+	
+			let camera, scene, renderer;
+			let geometry, material, mesh;
+	
+			function init() {
+				renderer = new THREE.WebGLRenderer( { antialias: true , alpha:true} );
+				// renderer.setClearColor( 0x000000 , 1);
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.sortObjects = true;
+	
+				if ( renderer.capabilities.isWebGL2 === false && renderer.extensions.has( 'ANGLE_instanced_arrays' ) === false ) {
+	
+					document.getElementById( 'notSupported' ).style.display = '';
+					return false;
+	
+				}
+	
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+	
+				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 5000 );
+				camera.position.z = 1400;
+	
+				scene = new THREE.Scene();
+	
+				const circleGeometry = new THREE.BoxGeometry( 5, 6,5 );
+	
+				geometry = new THREE.InstancedBufferGeometry();
+				geometry.index = circleGeometry.index;
+				geometry.attributes = circleGeometry.attributes;
+	
+				const particleCount = 12;
+	
+				const translateArray = new Float32Array( particleCount * 3 );
+	
+				for ( let i = 0, i3 = 0, l = particleCount; i < l; i ++, i3 += 3 ) {
+	
+					translateArray[ i3 + 0 ] = Math.sin(i/particleCount*2*3.14);
+					translateArray[ i3 + 1 ] = Math.cos(i/particleCount*2*3.14);
+	
+				}
+	
+				geometry.setAttribute( 'translate', new THREE.InstancedBufferAttribute( translateArray, 3 ) );
+	
+				material = new THREE.RawShaderMaterial( {
+					uniforms: {
+						"map": { value: new THREE.TextureLoader().load( 'sprites/sprite2.png' ) },
+						"time": { value: 0.0 }
+					},
+					transparent: true,
+					vertexShader: document.getElementById( 'vshader' ).textContent,
+					fragmentShader: document.getElementById( 'fshader' ).textContent,
+					depthTest: true,
+					depthWrite: true
+				} );
+	
+				mesh = new THREE.Mesh( geometry, material );
+				mesh.scale.set( 500, 500, 500 );
+				scene.add( mesh );
+	
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( renderer.domElement );
+	
+				stats = new Stats();
+				container.appendChild( stats.dom );
+	
+				window.addEventListener( 'resize', onWindowResize );
+	
+				return true;
+	
+			}
+	
+			function onWindowResize() {
+	
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+	
+				renderer.setSize( window.innerWidth, window.innerHeight );
+	
+			}
+	
+			function animate() {
+	
+				requestAnimationFrame( animate );
+	
+				render();
+				stats.update();
+	
+			}
+	
+			function render() {
+	
+				const time = performance.now() * 0.0005;
+	
+				material.uniforms[ "time" ].value = time;
+	
+				// mesh.rotation.x = time * 0.2;
+				// mesh.rotation.y = time * 0.4;
+	
+				renderer.render( scene, camera );
+	
+			}
+	
+			if ( init() ) {
+	
+				animate();
+	
+			}
+		</script>
+	</body>
+</html>
+
