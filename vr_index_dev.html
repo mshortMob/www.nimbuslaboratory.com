@@ -93,6 +93,72 @@
         </style>
 	</head>
 	<body>
+
+		<script id="vertexShader" type="x-shader/x-vertex">
+			precision mediump float;
+			precision mediump int;
+			
+			uniform mat4 modelViewMatrix; // optional
+			uniform mat4 projectionMatrix; // optional
+			
+			attribute vec3 position;
+			attribute vec4 color;
+			attribute vec2 uv;
+			
+			varying vec3 vPosition;
+			varying vec4 vColor;
+			varying vec2 vUv;
+			
+			void main()	{
+				vUv = uv;
+				vPosition = position;
+				vColor = color;
+			
+				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+			
+			}
+		</script>
+
+		<script id="fragmentShader1" type="x-shader/x-fragment">
+			precision highp float;
+			precision highp int;
+			
+			uniform float time;
+			varying vec2 vUv;
+
+			#define TAU 6.28318530718
+			#define MAX_ITER 5
+			
+			
+			void main( void ) {
+			
+			
+				float t = time * .015+23.0;
+				// uv should be the 0-1 uv of texture...
+				vec2 uv = vUv*2.;
+			
+				vec2 p = mod(uv*TAU, TAU)-250.0;
+				vec2 i = vec2(p);
+				float c = 1.7;
+				float inten = .005;
+			
+				for (int n = 0; n < MAX_ITER; n++) 
+				{
+					float t = t * (1.5 - (3.5 / float(n+1)));
+					i = p + vec2(cos(t - i.x) + sin(t + i.y), sin(t - i.y) + cos(t + i.x));
+					c += 1.0/length(vec2(p.x / (sin(i.x+t)/inten),p.y / (cos(i.y+t)/inten)));
+				}
+				c /= float(MAX_ITER);
+				c = 1.17-pow(c, 1.4);
+				vec3 colour = vec3(pow(abs(c), 8.0));
+				colour = clamp(colour + vec3(0.0, 0.0, 0.0), 0.0, 1.0);
+				
+			
+				gl_FragColor = vec4(colour, 1.0);
+			}
+			
+		</script>
+
 		<script type="module">
 			import * as THREE from 'https://threejs.org/build/three.module.js';
 
@@ -116,6 +182,12 @@
 			}
 			const tempMatrix = new THREE.Matrix4();
 			var dotsTexture=new THREE.TextureLoader().load( 'assets/dots.jpg' );
+			var uniforms1 = {
+					"time": { value: 1.0 },
+					"resolution": [100,100],
+					"mousex": { value: 0.0 },
+					"mousey": { value: 0.0 }
+			};
 
 			init();
 			animate();
@@ -130,6 +202,8 @@
 				// scene.add(createHemisphereMap());
 				// addBackgroundSprites();
 				// planeBufferTest();
+				scene.add(createShaderSphereMap());
+
 				addControlPanel();
 				initCameraAndLights();
 				raycaster = new THREE.Raycaster();
@@ -140,6 +214,16 @@
 
 				colorIndex=createColorIndex();
 				addObject(0,0,0,false,1,"select1");
+			}
+
+			function initShaderMaterial(){
+				var material = new THREE.RawShaderMaterial( {
+					uniforms: uniforms1,
+					vertexShader: document.getElementById( 'vertexShader' ).textContent,
+					fragmentShader: document.getElementById( 'fragmentShader1' ).textContent
+				} );	
+				material.side=THREE.DoubleSide;
+				return material;
 			}
 
 			function planeBufferTest(){
@@ -393,6 +477,15 @@
 				return hemiSphere;
 			}
 
+			function createShaderSphereMap(){
+				var radius = 60;
+				var radialSegments = 32;
+				var mat = initShaderMaterial();
+				var geo = new THREE.SphereGeometry( radius, radialSegments, radialSegments );
+				var sphere = new THREE.Mesh(geo, mat);
+				return sphere;
+			}
+			
 			function addBackgroundSprites(){
 				var geometry = new THREE.BufferGeometry();
 				var vertices = [];
@@ -521,6 +614,8 @@
 			}
 			
 			function render() {
+
+				uniforms1[ "time" ].value += .01 * 5;
 
 				calculateIntersects();
 
