@@ -387,6 +387,9 @@
 					var plane = new THREE.Mesh( geometry, material );
 					plane.position.set(x,y,-2-zOffset);
 					plane.name=name;
+					if(plane.name=="background"){
+						plane.lastSelectTime=new Date().getTime();
+					}
 					plane.onSelect=function(INTERSECTED,controller){
 						if(this.name.indexOf("brush")!=-1){
 							if(this.name!=brush){
@@ -409,11 +412,14 @@
 								yOffeset-=.05;
 							}
 							if(this.name=="background"){
-								selectedBackground=selectedBackground+1;
-								if(selectedBackground>=4){
-									selectedBackground=1;
+								if( (new Date().getTime() - this.lastSelectTime) > 400){
+									selectedBackground=selectedBackground+1;
+									if(selectedBackground>=4){
+										selectedBackground=1;
+									}
+									loadShaderPreset(selectedBackground);
+									this.lastSelectTime=new Date().getTime();
 								}
-								loadShaderPreset(selectedBackground);
 							}
 							if(this.name.indexOf("brush")!=-1){
 								brush=this.name;
@@ -611,40 +617,65 @@
 			}
 			
 			function calculateIntersects(){
-				function calculate(controllerObject){
-					tempMatrix.identity().extractRotation( controllerObject.matrixWorld )
-					raycaster.ray.origin.setFromMatrixPosition( controllerObject.matrixWorld );
-					raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( tempMatrix );
-
-					const intersects = raycaster.intersectObjects( controlsGroup.children );
-					if ( intersects.length > 0 ) {
-						// if ( INTERSECTED != intersects[ 0 ].object ) {
-							// if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-							INTERSECTED = intersects[ 0 ].object;
-							INTERSECTED.onSelect(INTERSECTED,controllerObject);
-						// }
-					} else {
-						if(INTERSECTED!=undefined){
-							INTERSECTED.onDeselect(INTERSECTED,controllerObject)
-						}
-						INTERSECTED = undefined;
-					}
+				var controllerObject=controller;
+				var controller1HasIntersects=false;
+				tempMatrix.identity().extractRotation( controllerObject.matrixWorld )
+				raycaster.ray.origin.setFromMatrixPosition( controllerObject.matrixWorld );
+				raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( tempMatrix );
+				var intersects = raycaster.intersectObjects( controlsGroup.children );
+				if ( intersects.length > 0 ) {
+						INTERSECTED = intersects[ 0 ].object;
+						INTERSECTED.onSelect(INTERSECTED,controllerObject);
+						controller1HasIntersects=true;
 				}
-				calculate(controller);
-				calculate(controller2);
+
+				controllerObject=controller2;
+				var controller2HasIntersects=false;
+				tempMatrix.identity().extractRotation( controllerObject.matrixWorld )
+				raycaster.ray.origin.setFromMatrixPosition( controllerObject.matrixWorld );
+				raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( tempMatrix );
+				intersects = raycaster.intersectObjects( controlsGroup.children );
+				if ( intersects.length > 0 ) {
+						INTERSECTED = intersects[ 0 ].object;
+						INTERSECTED.onSelect(INTERSECTED,controllerObject);
+						controller2HasIntersects=true;
+				}
+
+
+				if(controller1HasIntersects==false && controller2HasIntersects==false){
+					if(INTERSECTED!=undefined){
+						INTERSECTED.onDeselect(INTERSECTED,controllerObject)
+					}
+					INTERSECTED = undefined;
+				}
+
+				if(controller1HasIntersects==false && controller2HasIntersects==false){
+					return "none";
+				}else if(controller1HasIntersects==true && controller2HasIntersects==false){
+					return "oneOnly";
+				}else if(controller1HasIntersects==false && controller2HasIntersects==true){
+					return "twoOnly";
+				}else{
+					return "both";
+				}
 			}
 			
 			function render() {
 
 				uniforms1[ "time" ].value += .01 * 5;
 
-				calculateIntersects();
+				var menuSelection=calculateIntersects();
 
-				if ( controller.userData.isSelecting === true ){
-					addObject(0,0,0,false,1,"select1");
+				if(menuSelection!="oneOnly" && menuSelection!="both"){
+					if ( controller.userData.isSelecting === true ){
+						addObject(0,0,0,false,1,"select1");
+					}
 				}
-				if ( controller2.userData.isSelecting === true ){
-					addObject(0,0,0,false,2,"select2");
+
+				if(menuSelection!="twoOnly" && menuSelection!="both"){
+					if ( controller2.userData.isSelecting === true ){
+						addObject(0,0,0,false,2,"select2");
+					}
 				}
 				if ( controller.userData.isSqueezing === true ){
 					addObject(0,0,0,false,1,"squeeze1");
