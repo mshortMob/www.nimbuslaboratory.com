@@ -315,9 +315,9 @@
 				user.add( camera );
 				scene.add( user );
 
-				// if(window.location.href.indexOf("localhost")!=-1){
-				// 	user.rotateX(-1);
-				// }
+				if(window.location.href.indexOf("localhost")!=-1){
+					user.rotateX(-1);
+				}
 
 				scene.add( new THREE.HemisphereLight( 0x606060, 0x404040 ) );
 				const light = new THREE.DirectionalLight( 0xffffff );

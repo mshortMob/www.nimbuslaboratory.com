@@ -3,6 +3,7 @@ precision highp int;
 
 uniform float time;
 varying vec2 vUv;
+uniform sampler2D backbuffer;
 
 #define TAU 6.28318530718
 #define MAX_ITER 5
@@ -10,11 +11,10 @@ varying vec2 vUv;
 
 void main( void ) {
 
-
+	
 	float t = time * .015+23.0;
 	// uv should be the 0-1 uv of texture...
-	vec2 uv = vUv*2.;
-
+	vec2 uv = vUv*4.;
 	vec2 p = mod(uv*TAU, TAU)-250.0;
 	vec2 i = vec2(p);
 	float c = 1.7;
@@ -31,6 +31,8 @@ void main( void ) {
 	vec3 colour = vec3(pow(abs(c), 8.0));
 	colour = clamp(colour + vec3(0.0, 0.0, 0.0), 0.0, 1.0);
 	
-
-	gl_FragColor = vec4(colour, 1.0);
+	vec4 shadow = texture2D(backbuffer, p);
+	vec4 temp=vec4(vec3(colour.r,colour.g,colour.b), (colour.r,colour.g,colour.b)/3.0);
+	//temp/=shadow*.2;
+	gl_FragColor = vec4(0.,0.,0.,0.);
 }
