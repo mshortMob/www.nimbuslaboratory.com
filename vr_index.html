@@ -231,7 +231,7 @@
 
 			function loadShaderPreset(shaverVal){
 				var xmlhttp=new XMLHttpRequest();
-				xmlhttp.open("GET", "fragmentShaders/vr_background_shader_"+parseInt(shaverVal)+".txt", true);
+				xmlhttp.open("GET", "fragmentShaders/vr_background_shader_"+parseInt(shaverVal)+".txt?"+new Date().getTime(), true);
 				xmlhttp.send();
 				xmlhttp.onload = function(e){
 					document.getElementById( 'fragmentShader1').textContent=xmlhttp.response;
