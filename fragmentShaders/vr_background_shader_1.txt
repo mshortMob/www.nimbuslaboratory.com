@@ -1,38 +1,18 @@
-#extension GL_OES_standard_derivatives : enable
-
 precision highp float;
 precision highp int;
 
 uniform float time;
+
 varying vec2 vUv;
-uniform sampler2D backbuffer;
 
-#define less(a,b,c)      mix(a,b,step(0.,c))
-#define sabs(x,k) less((.5/k)*x*x+k*.5,abs(x),abs(x)-k)
-
-float smin( float a, float b, float k )
-{
-    float h = clamp( 0.5+0.5*(b-a)/k, 0.0, 1.0 );
-    return mix( b, a, h ) - k*h*(1.0-h);
-}
 void main( void ) {
-	vec2 position = 4.0 * vUv -2.0;
+	vec2 pos = -.25+.5*vUv;
+	pos = vec2(atan(pos.x,pos.y)/3.14159*2.,length(pos)*2.);
+	pos = abs(fract(pos)-.5)*0.5;
 	
-	position = sabs(position,0.05);
+	float d = abs(0.1 + length(pos) - 0.75 * abs(sin(time/4.0 - cos(time/4.0 * 0.01) * 9.0 * length(pos)))) * 5.0;
+	float e = abs(0.1 + length(pos) - 0.5 * abs(sin(time/4.0 * 0.5 - 4.))) * 10.0;
 	
-	float d  = length(position+ vec2(1.0,0.0)) - 0.5;
-	float d2  = length(position- vec2(1.0,0.0)) - 0.5;
-	
-	vec2 offset = vec2(sin(position.y*8.0+time*.05),cos(position.x*8.0+.03*time));
-	offset = sabs(offset,0.7);
-	offset *= 0.45;
-	
-	float d3  = length(position-offset) - .3;
-	d = smin(d, d2,0.45);
-	d = smin(d,d3,0.3+sin(time)*0.015);
-	d = sin(d * 15.0 - time/10.4);
-	
-	d = sabs(d,.5);
-	d = 0.55 / d;
-	gl_FragColor = vec4(step(vec3(d*0.38, d*.41, d*0.8),vec3(.25,.25,.25)), 1.0);
+	gl_FragColor += vec4(0.07/d, 0.1 / e, 0.1 / d/e, 1.0);
 }
+

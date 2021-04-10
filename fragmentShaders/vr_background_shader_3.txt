@@ -1,13 +1,18 @@
-#extension GL_OES_standard_derivatives : enable
-
 precision highp float;
 precision highp int;
 
 uniform float time;
+
 varying vec2 vUv;
-uniform sampler2D backbuffer;
 
 void main( void ) {
-
-	gl_FragColor = vec4(0.,0.,0., 1.0);
+	vec2 pos = -.25+.5*vUv;
+	pos = vec2(atan(pos.x,pos.y)/3.14159*2.,length(pos)*2.);
+	pos = abs(fract(pos)-.5)*0.5;
+	
+	float d = abs(0.1 + length(pos) - 0.75 * abs(sin(time/4.0 - cos(time/4.0 * 0.01) * 9.0 * length(pos)))) * 5.0;
+	float e = abs(0.1 + length(pos) - 0.5 * abs(sin(time/4.0 * 0.5 - 4.))) * 10.0;
+	
+	gl_FragColor += vec4(0.,0.,0., 1.0);
 }
+
