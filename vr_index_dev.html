@@ -455,11 +455,11 @@
 				}
 
 				controlsGroup=new THREE.Group();
-				controlsGroup.add( addPlaneButton(.6,1,0,.5,.5,0x222222,"left") );
-				controlsGroup.add( addPlaneButton(-.6,1,0,.5,.5,0x222222,"right") );
+				controlsGroup.add( addPlaneButton(.57,1,0,.5,.5,0x222222,"left") );
+				controlsGroup.add( addPlaneButton(-.57,1,0,.5,.5,0x222222,"right") );
 				controlsGroup.add( addPlaneButton(0,1.6,0,.5,.5,0x222222,"up") );
 				controlsGroup.add( addPlaneButton(0,.4,0,.5,.5,0x222222,"down") );
-				controlsGroup.add( addPlaneButton(0,1.,0,.35,.35,0x222222,"background") );
+				controlsGroup.add( addPlaneButton(0,1.,0,.5,.5,0x222222,"background") );
 				var brush1PlaneButton=addPlaneButton(1.8,.4,0,.5,.5,0x222222,"brush1");
 				INTERSECTED=brush1PlaneButton;
 				brush1PlaneButton.onDeselect(brush1PlaneButton);
@@ -510,6 +510,7 @@
 				var mat = initShaderMaterial();
 				var geo = new THREE.SphereGeometry( radius, radialSegments, radialSegments );
 				var sphere = new THREE.Mesh(geo, mat);
+				sphere.rotateY(2*3.14*.25)
 				return sphere;
 			}
 			
