@@ -2,6 +2,10 @@
 	<head>
 		<title>ShaderMapper</title>
 		<style>
+			img{
+				z-index: 11;
+				position:absolute;
+			}
 			body{
 			    margin:0px;
 				background-color:black;
@@ -53,11 +57,51 @@
 		<script src="dependancies/NURBSSurface.js"></script>
 		<script src="dependancies/NURBSUtils.js"></script>
 		<script src="dependancies/TrackballControls.js"></script> 
+		<img width="256" height="256" id="streamInput" style="z-index:11;" src="http://192.168.0.72:4747/video"></img>
 	
 		<script>
-			let camera, scene, renderer, mesh, mouse, raycaster, selected;
+			let camera, scene, renderer, mesh, mouse, raycaster, selected, streamData, texture;
+			var isFirst=true;
 			init();
 			animate();
+
+			function initStreamInput(){
+				var img = document.getElementById("streamInput");
+				// img.style.display='none';
+				var canvas = document.createElement('canvas');
+				canvas.id="streamDataCanvas"
+				canvas.style.position='absolute';
+				canvas.width = img.width;
+				canvas.height = img.height;
+				canvas.style.backgroundColor='red';
+				canvas.style.zIndex=13;
+				canvas.style.left=img.width+'px';
+				canvas.style.width=img.width+'px';
+				canvas.style.height=img.height+'px';
+				document.body.appendChild(canvas)
+
+				mesh.material.map = new THREE.DataTexture( streamData, img.width, img.height, THREE.RGBFormat );
+				mesh.material.map.needsUpdate=true;
+
+				setInterval(function(){
+					var img = document.getElementById("streamInput");
+					var canvas = document.getElementById('streamDataCanvas');
+					canvas.width = img.width;
+					canvas.height = img.height;
+					canvas.getContext('2d').drawImage(img, 0, 0, img.width, img.height);
+					// canvas.getContext('2d').getImageData(0,0,img.width,img.height).data;
+					if(isFirst){
+						setTimeout(function(){
+							canvas.getContext('2d').drawImage(img, 0, 0, img.width, img.height);
+							streamData=canvas.getContext('2d').getImageData(0,0,img.width,img.height).data;
+							mesh.material.map = new THREE.DataTexture( streamData, img.width, img.height, THREE.RGBFormat );
+							mesh.material.map.needsUpdate=true;
+						},7000)
+						isFirst=false;
+					}
+					console.log(streamData);
+				},1000)
+			}
 
 			function init() {
 				camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 1000 );
@@ -68,7 +112,7 @@
 				const light = new THREE.AmbientLight( 0xffffff, 2. ); // soft white light
 				scene.add( light );
 
-				const texture = new THREE.TextureLoader().load( 'assets/paul.jpg' );
+				texture = new THREE.TextureLoader().load( 'assets/paul.jpg' );
 				const geometry = new THREE.PlaneBufferGeometry(  200, 200, 1, 1  );
 
 				var positionAttribute = geometry.attributes.position;
@@ -105,6 +149,8 @@
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				document.body.appendChild( renderer.domElement );
 				window.addEventListener( 'resize', onWindowResize );
+
+				initStreamInput();
 
 			}
 
