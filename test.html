@@ -57,18 +57,23 @@
 		<script src="dependancies/NURBSSurface.js"></script>
 		<script src="dependancies/NURBSUtils.js"></script>
 		<script src="dependancies/TrackballControls.js"></script> 
-		<img width="256" height="256" id="streamInput" style="z-index:11;" src="http://192.168.0.72:4747/video"></img>
+		<img width="256" height="256" id="streamInput" style="z-index:11;" crossorigin="Anonymous" src="http://192.168.0.72:4747/video"></img>
+		<!-- <img width="256" height="256" id="streamInput" style="z-index:11;" crossorigin="Anonymous" src="http://localhost/assets/grass2.jpg"></img> -->
+		grass2.jpg 
 	
 		<script>
-			let camera, scene, renderer, mesh, mouse, raycaster, selected, streamData, texture;
+			let camera, scene, renderer, mesh, mouse, raycaster, selected, texture;
+			var streamData = new Uint8Array( 4 * 256 );
 			var isFirst=true;
 			init();
 			animate();
 
 			function initStreamInput(){
 				var img = document.getElementById("streamInput");
-				// img.style.display='none';
+				img.crossOrigin="Anonymous";
+				img.style.display='none';
 				var canvas = document.createElement('canvas');
+				canvas.style.display='none';
 				canvas.id="streamDataCanvas"
 				canvas.style.position='absolute';
 				canvas.width = img.width;
@@ -80,27 +85,18 @@
 				canvas.style.height=img.height+'px';
 				document.body.appendChild(canvas)
 
-				mesh.material.map = new THREE.DataTexture( streamData, img.width, img.height, THREE.RGBFormat );
-				mesh.material.map.needsUpdate=true;
-
 				setInterval(function(){
 					var img = document.getElementById("streamInput");
+					img.crossOrigin="Anonymous";
 					var canvas = document.getElementById('streamDataCanvas');
 					canvas.width = img.width;
 					canvas.height = img.height;
 					canvas.getContext('2d').drawImage(img, 0, 0, img.width, img.height);
-					// canvas.getContext('2d').getImageData(0,0,img.width,img.height).data;
-					if(isFirst){
-						setTimeout(function(){
-							canvas.getContext('2d').drawImage(img, 0, 0, img.width, img.height);
-							streamData=canvas.getContext('2d').getImageData(0,0,img.width,img.height).data;
-							mesh.material.map = new THREE.DataTexture( streamData, img.width, img.height, THREE.RGBFormat );
-							mesh.material.map.needsUpdate=true;
-						},7000)
-						isFirst=false;
-					}
-					console.log(streamData);
-				},1000)
+					// streamData=canvas.getContext('2d').getImageData(0,0,img.width,img.height).data;
+					mesh.material.map = new THREE.CanvasTexture( canvas );
+					mesh.material.map.needsUpdate=true;
+					// console.log(streamData);
+				},100);
 			}
 
 			function init() {
