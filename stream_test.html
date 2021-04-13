@@ -49,7 +49,7 @@
 			}
 		</style>
 	</head>
-	<body>
+	<body onclick="requestFullScreen();">
 		<script src="dependancies/three.js"></script>
 		<script src="dependancies/pixel8.js"></script>
 		<script src="dependancies/dat.gui.min.js"></script>
@@ -59,7 +59,6 @@
 		<script src="dependancies/TrackballControls.js"></script> 
 		<img width="256" height="256" id="streamInput" style="z-index:11;" crossorigin="Anonymous" src="http://192.168.0.72:4747/video"></img>
 		<!-- <img width="256" height="256" id="streamInput" style="z-index:11;" crossorigin="Anonymous" src="http://localhost/assets/grass2.jpg"></img> -->
-		grass2.jpg 
 	
 		<script>
 			let camera, scene, renderer, mesh, mouse, raycaster, selected, texture;
@@ -67,6 +66,21 @@
 			var isFirst=true;
 			init();
 			animate();
+
+			function requestFullScreen() {
+				// Supports most browsers and their versions.
+				var element = document.body; // Make the body go full screen.
+				var requestMethod = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || element.msRequestFullScreen;
+			
+				if (requestMethod) { // Native full screen.
+					requestMethod.call(element);
+				} else if (typeof window.ActiveXObject !== "undefined") { // Older IE.
+					var wscript = new ActiveXObject("WScript.Shell");
+					if (wscript !== null) {
+						wscript.SendKeys("{F11}");
+					}
+				}
+			}
 
 			function initStreamInput(){
 				var img = document.getElementById("streamInput");
@@ -109,7 +123,7 @@
 				scene.add( light );
 
 				texture = new THREE.TextureLoader().load( 'assets/paul.jpg' );
-				const geometry = new THREE.PlaneBufferGeometry(  200, 200, 1, 1  );
+				const geometry = new THREE.PlaneBufferGeometry(  window.innerWidth, window.innerHeight, 1, 1  );
 
 				var positionAttribute = geometry.attributes.position;
 				console.log( positionAttribute );
