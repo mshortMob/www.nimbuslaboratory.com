@@ -97,8 +97,9 @@
 			}
 	
 			void main() {
+				vec3 mask = texture2D( map, vUv ).rgb;
 				vec3 temp=HSLtoRGB(vec3(vScale/5.0, 1.0, 0.5));
-				gl_FragColor = vec4( vec3(vScale/5.0, 1.0, 0.5), (temp.r+temp.g+temp.b)/3.0 );
+				gl_FragColor = vec4( temp*mask, (temp.r+temp.g+temp.b)/3.0 );
 	
 				//if ( diffuseColor.w < 0.5 ) discard;
 			}
@@ -156,7 +157,7 @@
 	
 				material = new THREE.RawShaderMaterial( {
 					uniforms: {
-						"map": { value: new THREE.TextureLoader().load( 'sprites/sprite2.png' ) },
+						"map": { value: new THREE.TextureLoader().load( 'sprites/sprite3.png' ) },
 						"time": { value: 0.0 }
 					},
 					transparent: true,

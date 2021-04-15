@@ -698,8 +698,8 @@
 				controller2.lastPosition.y=controller2.position.y;
 				controller2.lastPosition.z=controller2.position.z;
 
-				// monitorSphere.position.set(0+controller.velocity.x+controller2.velocity.z,.5+controller.velocity.y+controller2.velocity.y,-3+controller.velocity.z+controller2.velocity.z);
-				monitorSphere.position.set(0,.5+((controller.velocity.z+controller2.velocity.z)*10.0),-3)
+				// monitorSphere.position.set(0,.5+((controller.velocity.z+controller2.velocity.z)*10.0),-3)
+
 				if( (Math.abs(controller.velocity.z)>1.2 && controller.userData.isSelecting === false) || (Math.abs(controller2.velocity.z)>1.2 && controller2.userData.isSelecting === false) ){
 					if( (new Date().getTime() - monitorSphere.lastSelectTime) > 400){
 						selectedBackground=selectedBackground+1;
