@@ -190,6 +190,7 @@
 			};
 			var backgroundSphere;
 			var selectedBackground=3;
+			var monitorSphere;
 			init();
 			animate();
 
@@ -208,6 +209,7 @@
 				loadShaderPreset(3);
 
 				addControlPanel();
+				initMonitoringSphere();
 				initCameraAndLights();
 				raycaster = new THREE.Raycaster();
 				initRenderer();
@@ -219,6 +221,16 @@
 				addObject(0,0,0,false,1,"select1");
 			}
 
+			function initMonitoringSphere(){
+				const geometry = new THREE.SphereGeometry( .25, 32, 32 );
+				const material = new THREE.MeshBasicMaterial( {color: 0xffff00, side:THREE.DoubleSide} );
+				monitorSphere = new THREE.Mesh( geometry, material );
+				monitorSphere.position.set(0,.5,-3);		
+				monitorSphere.lastSelectTime=new Date().getTime();	
+				scene.add( monitorSphere );
+
+			}
+			
 			function initShaderMaterial(){
 				var material = new THREE.RawShaderMaterial( {
 					uniforms: uniforms1,
@@ -316,9 +328,9 @@
 				user.add( camera );
 				scene.add( user );
 
-				if(window.location.href.indexOf("localhost")!=-1){
-					user.rotateX(-1);
-				}
+				// if(window.location.href.indexOf("localhost")!=-1){
+				// 	user.rotateX(-1);
+				// }
 
 				scene.add( new THREE.HemisphereLight( 0x606060, 0x404040 ) );
 				const light = new THREE.DirectionalLight( 0xffffff );
@@ -366,6 +378,12 @@
 				controller2.addEventListener( 'disconnected', function () {
 					this.remove( this.children[ 0 ] );
 				} );
+
+				controller.velocity=new THREE.Vector3();
+				controller2.velocity=new THREE.Vector3();
+				controller.lastPosition=new THREE.Vector3();
+				controller2.lastPosition=new THREE.Vector3();
+
 				scene.add( controller );
 				scene.add( controller2 );
 
@@ -377,6 +395,7 @@
 				controllerGrip2 = renderer.xr.getControllerGrip( 1 );
 				controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
 				scene.add( controllerGrip2 );
+			
 			}
 
 			function addControlPanel(){
@@ -582,8 +601,9 @@
 						geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( [ 0.5, 0.5, 0.5, 0, 0, 0 ], 3 ) );
 
 						material = new THREE.LineBasicMaterial( { vertexColors: true, blending: THREE.AdditiveBlending } );
-
-						return new THREE.Line( geometry, material );
+						
+						var temp=new THREE.Line( geometry, material );
+						return temp;
 
 					case 'gaze':
 
@@ -661,8 +681,38 @@
 				}
 			}
 			
-			function render() {
+			function calculateControllerVelocities(){
+				var scaleFactor=25.0;
+				controller.velocity.x=scaleFactor*(controller.position.x-controller.lastPosition.x);
+				controller.velocity.y=scaleFactor*(controller.position.y-controller.lastPosition.y);
+				controller.velocity.z=scaleFactor*(controller.position.z-controller.lastPosition.z);
+				controller2.velocity.x=scaleFactor*(controller2.position.x-controller2.lastPosition.x);
+				controller2.velocity.y=scaleFactor*(controller2.position.y-controller2.lastPosition.y);
+				controller2.velocity.z=scaleFactor*(controller2.position.z-controller2.lastPosition.z);
 
+				controller.lastPosition.x=controller.position.x;
+				controller.lastPosition.y=controller.position.y;
+				controller.lastPosition.z=controller.position.z;
+				controller2.lastPosition.x=controller2.position.x;
+				controller2.lastPosition.y=controller2.position.y;
+				controller2.lastPosition.z=controller2.position.z;
+
+				// monitorSphere.position.set(0+controller.velocity.x+controller2.velocity.z,.5+controller.velocity.y+controller2.velocity.y,-3+controller.velocity.z+controller2.velocity.z);
+				monitorSphere.position.set(0,.5+((controller.velocity.z+controller2.velocity.z)*10.0),-3)
+				if(Math.abs((controller.velocity.z+controller2.velocity.z)>.7)){
+					if( (new Date().getTime() - monitorSphere.lastSelectTime) > 400){
+						selectedBackground=selectedBackground+1;
+						if(selectedBackground>=6){
+							selectedBackground=1;
+						}
+						loadShaderPreset(selectedBackground);
+						monitorSphere.lastSelectTime=new Date().getTime();
+					}
+				}
+			}
+			
+			function render() {
+				calculateControllerVelocities();
 				uniforms1[ "time" ].value += .01 * 5;
 
 				var menuSelection=calculateIntersects();
