@@ -227,6 +227,7 @@
 				monitorSphere = new THREE.Mesh( geometry, material );
 				monitorSphere.position.set(0,.5,-3);		
 				monitorSphere.lastSelectTime=new Date().getTime();	
+				monitorSphere.visible=false;
 				scene.add( monitorSphere );
 
 			}
