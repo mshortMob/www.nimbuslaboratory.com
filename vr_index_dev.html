@@ -700,7 +700,7 @@
 
 				// monitorSphere.position.set(0+controller.velocity.x+controller2.velocity.z,.5+controller.velocity.y+controller2.velocity.y,-3+controller.velocity.z+controller2.velocity.z);
 				monitorSphere.position.set(0,.5+((controller.velocity.z+controller2.velocity.z)*10.0),-3)
-				if(Math.abs(controller.velocity.z+controller2.velocity.z)>1.6){
+				if(Math.abs(controller.velocity.z+controller2.velocity.z)>1.47){
 					if( (new Date().getTime() - monitorSphere.lastSelectTime) > 400){
 						selectedBackground=selectedBackground+1;
 						if(selectedBackground>=6){
