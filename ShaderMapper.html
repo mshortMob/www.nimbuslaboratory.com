@@ -602,6 +602,168 @@ void main()	{
 				}
 			}
 			
+			function testObject(){
+			  function createGeometry(u,v){
+					nsControlPoints = [
+						 [
+							 new THREE.Vector4 ( -200, -200, 0, 1 ),
+							 new THREE.Vector4 ( -200, -100, 0, 1 ),
+							 new THREE.Vector4 ( -200, 100, 0, 1 ),
+							 new THREE.Vector4 ( -200, 200, 0, 1 )
+						 ],
+						 [
+							 new THREE.Vector4 ( 0, -200, 0, 1 ),
+							 new THREE.Vector4 ( 0, -100, 0, 1 ),
+							 new THREE.Vector4 ( 0, 100, 0, 1 ),
+							 new THREE.Vector4 ( 0, 200, 0, 1 )
+						 ],
+						 [
+							 new THREE.Vector4 ( 200, -200, 0, 1 ),
+							 new THREE.Vector4 ( 200, -100, 0, 1 ),
+							 new THREE.Vector4 ( 200, 100, 0, 1 ),
+							 new THREE.Vector4 ( 200, 200, 0, 1 )
+						 ]
+					 ];
+					 degree1 = 2
+					 degree2 = 3;
+					 knots1 = [0, 0, 0, 1, 1, 1];
+					 knots2 = [0, 0, 0, 0, 1, 1, 1, 1];
+					 nurbsSurface = new THREE.NURBSSurface(degree1, degree2, knots1, knots2, nsControlPoints);
+					 return nurbsSurface.getPoint(u, v);		
+			  }
+			  function createObject(){
+				var geometry = new THREE.ParametricGeometry( createGeometry, 10, 10 );			  
+				//var geometry=new THREE.BoxGeometry( 10, 10, 10 );
+				var object = new THREE.Mesh( geometry, materialsList[0]);				
+				return object;
+			  }
+			  var object = createObject();
+			  object.showChildren=function(){
+			        if (globalController.mappingMode>.5) {
+						for(var x=0; x<object.children.length ;x++){
+								object.children[x].visible=true;							
+						}
+					}else{
+						for(var x=0; x<object.children.length ;x++){
+							if (object.children[x].isCorner==true) {
+								object.children[x].visible=true;
+								object.updatecorners;
+							}
+						}					
+					}
+			  }
+			  object.hideChildren=function(){
+				for(var x=object.children.length-1;x>=0 ;x--){
+						object.children[x].visible=false;			
+				}
+			  }
+			  object.drawV=function(){
+				for(var x=0; x<object.geometry.vertices.length ; x++ ){
+					//var  geo = new THREE.BoxGeometry( 35, 35, 0 );
+					//var mat = new THREE.PointsMaterial( { size: 300, vertexColors: THREE.VertexColors , color: 0xffffff } );
+					//var mesh1 = new THREE.Mesh( geo, mat );
+					mesh1 = new THREE.Mesh( new THREE.CircleGeometry(45, 45, 0, Math.PI * 2 ), new THREE.MeshPhongMaterial({side: THREE.DoubleSide, color:0xffffff}))
+					mesh1.name="vertice"+x;
+					mesh1.isCorner=false;
+					if (x == 0 || x == 4 || x == 24 || x == 20) {
+						mesh1.isCorner=true;
+					}
+					mesh1.vertNum=x;
+					mesh1.position.x=object.geometry.vertices[x].x;
+					mesh1.position.y=object.geometry.vertices[x].y;
+					mesh1.position.z=-5;
+					object.add(mesh1)
+					objects.push(mesh1)
+				}
+			  }
+			  object.setState=function(savedJSON){
+				object.visible=savedJSON.Visible;
+				object.position.z= savedJSON.ZValue
+				object.material=materialsList[parseInt(savedJSON.Shader-1)]
+				for(var x=0;x<object.geometry.vertices.length;x++){
+					object.geometry.vertices[x].x=savedJSON["VerticeX"+x]
+					object.geometry.vertices[x].y=savedJSON["VerticeY"+x]
+					object.children[x].position.x=savedJSON["VerticeX"+x]
+					object.children[x].position.y=savedJSON["VerticeY"+x]
+				}
+				object.geometry.verticesNeedUpdate = true;
+			  }	  
+			  object.updateCorners=function(){
+					var cornerNum=[];
+					cornerNum[0]=0;
+					cornerNum[1]=Math.sqrt(object.geometry.vertices.length)-1
+					cornerNum[2]=object.geometry.vertices.length-1-(Math.sqrt(object.geometry.vertices.length)-1)
+					cornerNum[3]=object.geometry.vertices.length-1
+					var x1 = object.geometry.vertices[cornerNum[0]].x
+					var y1 = object.geometry.vertices[cornerNum[0]].y
+					var x2 = object.geometry.vertices[cornerNum[1]].x
+					var y2 = object.geometry.vertices[cornerNum[1]].y
+					var x3 = object.geometry.vertices[cornerNum[2]].x
+					var y3 = object.geometry.vertices[cornerNum[2]].y
+					var x4 = object.geometry.vertices[cornerNum[3]].x
+					var y4 = object.geometry.vertices[cornerNum[3]].y
+					var xDiff1=(x2-x1)/(Math.sqrt(object.geometry.vertices.length)-1)
+					var yDiff1=(y2-y1)/(Math.sqrt(object.geometry.vertices.length)-1)
+					for(var x=0; x<Math.sqrt(object.geometry.vertices.length);x++){
+						 object.geometry.vertices[x].x=+object.geometry.vertices[0].x+xDiff1*x;
+						 object.geometry.vertices[x].y=object.geometry.vertices[0].y+yDiff1*x;
+					}
+					xDiff1=(x3-x1)/(Math.sqrt(object.geometry.vertices.length)-1)
+					yDiff1=(y3-y1)/(Math.sqrt(object.geometry.vertices.length)-1)
+					for(var x=0; x<Math.sqrt(object.geometry.vertices.length);x++){
+						 object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length))*x].x=+object.geometry.vertices[0].x+xDiff1*x;
+						 object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length))*x].y=object.geometry.vertices[0].y+yDiff1*x;
+					}
+					xDiff1=(x4-x3)/(Math.sqrt(object.geometry.vertices.length)-1)
+					yDiff1=(y4-y3)/(Math.sqrt(object.geometry.vertices.length)-1)
+					for(var x=object.geometry.vertices.length-1; x>object.geometry.vertices.length-Math.sqrt(object.geometry.vertices.length);x--){
+						 object.geometry.vertices[x].x=object.geometry.vertices[object.geometry.vertices.length-1].x+xDiff1*(x-(object.geometry.vertices.length-1));
+						 object.geometry.vertices[x].y=object.geometry.vertices[object.geometry.vertices.length-1].y+yDiff1*(x-(object.geometry.vertices.length-1));
+					}
+					xDiff1=(x4-x2)/(Math.sqrt(object.geometry.vertices.length)-1)
+					yDiff1=(y4-y2)/(Math.sqrt(object.geometry.vertices.length)-1)
+					for(var x=0; x<Math.sqrt(object.geometry.vertices.length);x++){
+						 object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length))*x+Math.sqrt(object.geometry.vertices.length)-1].x=object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length)-1)].x+xDiff1*(x);
+						 object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length))*x+Math.sqrt(object.geometry.vertices.length)-1].y=object.geometry.vertices[(Math.sqrt(object.geometry.vertices.length)-1)].y+yDiff1*(x);
+					}
+					var sqrt=(Math.sqrt(object.geometry.vertices.length))
+					var numOfMiddleRows=(Math.sqrt(object.geometry.vertices.length)-2)
+					for(var rowNum = 1; rowNum < (Math.sqrt(object.geometry.vertices.length)-1) ; rowNum ++){
+						 var x1 = object.geometry.vertices[rowNum*sqrt].x
+						 var y1 = object.geometry.vertices[rowNum*sqrt].y
+						 var x2 = object.geometry.vertices[rowNum*sqrt+(sqrt-1)].x
+						 var y2 = object.geometry.vertices[rowNum*sqrt+(sqrt-1)].y
+						 xDiff1=(x2-x1)/(Math.sqrt(object.geometry.vertices.length)-1)
+						 yDiff1=(y2-y1)/(Math.sqrt(object.geometry.vertices.length)-1)
+						 for(var x=0; x<(Math.sqrt(object.geometry.vertices.length)-1) ; x++ ){
+							  object.geometry.vertices[rowNum*sqrt+x].x= x1+xDiff1*x;
+							  object.geometry.vertices[rowNum*sqrt+x].y= y1+yDiff1*x;
+						 }
+					}
+					
+					object.geometry.verticesNeedUpdate = true;
+					//object.drawV()
+					for(var x=0;x<object.geometry.vertices.length;x++){
+						objectController["VerticeX"+x]=object.geometry.vertices[x].x;
+						objectController["VerticeY"+x]=object.geometry.vertices[x].y;
+					}
+					for(var x=0;x<object.children.length;x++){
+						if(object.children[x].name.indexOf("vertice"!=0)){
+							object.children[x].position.x=object.geometry.vertices[x].x;
+							object.children[x].position.y=object.geometry.vertices[x].y;
+							statesArray[globalController.selectedObject]["VerticeX"+x]=object.geometry.vertices[x].x;
+							statesArray[globalController.selectedObject]["VerticeY"+x]=object.geometry.vertices[x].y;
+						}		
+					}
+					updateControlsValues();
+					//updateControlsView();
+			  }
+			  object.drawV();
+			  object.visible=false;
+			  scene.add(object);
+			  displayObjects.push(object);
+			}
+
 			function addObject(){
 			  function createGeometry(u,v){
 					nsControlPoints = [

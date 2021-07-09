@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>three.js vr - cubes</title>
+		<title>VR Painter</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
         <style>
@@ -93,137 +93,482 @@
         </style>
 	</head>
 	<body>
-		<script type="module">
-			import * as THREE from 'https://threejs.org/build/three.module.js';
 
-			import { BoxLineGeometry } from 'https://threejs.org/examples/jsm/geometries/BoxLineGeometry.js';
-			import { VRButton } from 'https://threejs.org/examples/jsm/webxr/VRButton.js';
-			import { XRControllerModelFactory } from 'https://threejs.org/examples/jsm/webxr/XRControllerModelFactory.js';
+		<script id="vertexShader" type="x-shader/x-vertex">
+			precision mediump float;
+			precision mediump int;
+			
+			uniform mat4 modelViewMatrix; // optional
+			uniform mat4 projectionMatrix; // optional
+			
+			attribute vec3 position;
+			attribute vec4 color;
+			attribute vec2 uv;
+			
+			varying vec3 vPosition;
+			varying vec4 vColor;
+			varying vec2 vUv;
+			
+			void main()	{
+				vUv = uv;
+				vPosition = position;
+				vColor = color;
+			
+				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+			
+			}
+		</script>
+
+		<script id="fragmentShader1" type="x-shader/x-fragment">
+				precision highp float;
+				precision highp int;
+				
+				uniform float time;
+				varying vec2 vUv;
+
+				#define TAU 6.28318530718
+				#define MAX_ITER 5
+				
+				
+				void main( void ) {
+				
+				
+					float t = time * .015+23.0;
+					// uv should be the 0-1 uv of texture...
+					vec2 uv = vUv*2.;
+				
+					vec2 p = mod(uv*TAU, TAU)-250.0;
+					vec2 i = vec2(p);
+					float c = 1.7;
+					float inten = .005;
+				
+					for (int n = 0; n < MAX_ITER; n++) 
+					{
+						float t = t * (1.5 - (3.5 / float(n+1)));
+						i = p + vec2(cos(t - i.x) + sin(t + i.y), sin(t - i.y) + cos(t + i.x));
+						c += 1.0/length(vec2(p.x / (sin(i.x+t)/inten),p.y / (cos(i.y+t)/inten)));
+					}
+					c /= float(MAX_ITER);
+					c = 1.17-pow(c, 1.4);
+					vec3 colour = vec3(pow(abs(c), 8.0));
+					colour = clamp(colour + vec3(0.0, 0.0, 0.0), 0.0, 1.0);
+					
+				
+					gl_FragColor = vec4(colour, 1.0);
+				}
+			
+		</script>
+
+		<script type="module">
+			import * as THREE from './dependancies/three.module.js';
+
+			import { BoxLineGeometry } from './dependancies/BoxLineGeometry.js';
+			import { VRButton } from './dependancies/VRButton.js';
+			import { XRControllerModelFactory } from './dependancies/XRControllerModelFactory.js';
 
 			const clock = new THREE.Clock();
-
 			let container;
-			let camera, scene, raycaster, renderer;
-
+			let camera, scene, raycaster, renderer, user;
 			let room;
-			let group;
-
-			let controller, controllerGrip;
+			let controlsGroup;
+			let controller, controller2, controllerGrip, controllerGrip2;
+			let colorIndex;
 			let INTERSECTED;
+			var yOffeset=0;
+			if(window.location.href.indexOf("localhost")!=-1){
+				var brush="brush3";
+			}else{
+				var brush="brush1";
+			}
 			const tempMatrix = new THREE.Matrix4();
-
-			var sPressed=false;
-			var triggerTime=new Date().getTime();
-
+			var dotsTexture=new THREE.TextureLoader().load( 'assets/dots.jpg' );
+			var uniforms1 = {
+					"time": { value: 1.0 },
+					"resolution": [100,100],
+					"mousex": { value: 0.0 },
+					"mousey": { value: 0.0 }
+			};
+			var backgroundSphere;
+			var selectedBackground=3;
 			init();
 			animate();
 
 			function init() {
-
 				window.addEventListener("keypress", keyHandler);
 				window.addEventListener("keyup", keyHandler);
-
 				container = document.createElement( 'div' );
 				document.body.appendChild( container );
-
 				scene = new THREE.Scene();
-				scene.background = new THREE.Color( 0x000000 );
+				// scene.fog = new THREE.Fog(0x000000, 0, 65);
+				// scene.add(createHemisphereMap());
+				// addBackgroundSprites();
+				// planeBufferTest();
+				backgroundSphere=createShaderSphereMap();
+				scene.add(backgroundSphere);
+				loadShaderPreset(3);
 
-				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 10 );
-				camera.position.set( 0, 1.6, 3);
-				scene.add( camera );
+				addControlPanel();
+				initCameraAndLights();
+				raycaster = new THREE.Raycaster();
+				initRenderer();
+				initControllers();
+				window.addEventListener( 'resize', onWindowResize );
+				document.body.appendChild( VRButton.createButton( renderer ) );
 
-				room = new THREE.LineSegments(
-					new BoxLineGeometry( 6, 6, 6, 10, 10, 10 ).translate( 0, 3, 0 ),
-					new THREE.LineBasicMaterial( { color: 0xaaaaaa } )
-				);
-				scene.add( room );
+				colorIndex=createColorIndex();
+				addObject(0,0,0,false,1,"select1");
+			}
 
-				scene.add( new THREE.HemisphereLight( 0x606060, 0x404040 ) );
+			function initShaderMaterial(){
+				var material = new THREE.RawShaderMaterial( {
+					uniforms: uniforms1,
+					vertexShader: document.getElementById( 'vertexShader' ).textContent,
+					fragmentShader: document.getElementById( 'fragmentShader1' ).textContent
+				} );	
+				material.side=THREE.DoubleSide;
+				return material;
+			}
 
-				const light = new THREE.DirectionalLight( 0xffffff );
-				light.position.set( 1, 1, 1 ).normalize();
-				scene.add( light );
+			function loadShaderPreset(shaverVal){
+				var xmlhttp=new XMLHttpRequest();
+				xmlhttp.open("GET", "fragmentShaders/vr_background_shader_"+parseInt(shaverVal)+".txt?"+new Date().getTime(), true);
+				xmlhttp.send();
+				xmlhttp.onload = function(e){
+					document.getElementById( 'fragmentShader1').textContent=xmlhttp.response;
+					backgroundSphere.material=initShaderMaterial()
+				}
+			}
+			
+			function planeBufferTest(){
+				const geometry = new THREE.BufferGeometry();
+				const indices = [];
+				const vertices = [];
+				const normals = [];
+				const colors = [];
+				const size = 1000;
+				const segments = 50;
+				const halfSize = size / 2;
+				const segmentSize = size / segments;
 
-				const geometry = new THREE.BoxGeometry( 0.15, 0.15, 0.15 );
-
-				for ( let i = 0; i < 8; i ++ ) {
-
-					var object=createSpriteSphere();
-
-					object.position.x = Math.random() * 4 - 2;
-					object.position.y = Math.random() * 4;
-					object.position.z = Math.random() * 4 - 2;
-
-					object.rotation.x = Math.random() * 2 * Math.PI;
-					object.rotation.y = Math.random() * 2 * Math.PI;
-					object.rotation.z = Math.random() * 2 * Math.PI;
-
-					object.scale.set(.05,.05,.05);
-
-					object.userData.velocity = new THREE.Vector3();
-					object.userData.velocity.x = Math.random() * 0.01 - 0.005;
-					object.userData.velocity.y = Math.random() * 0.01 - 0.005;
-					object.userData.velocity.z = Math.random() * 0.01 - 0.005;
-
-					room.add( object );
+				// generate vertices, normals and color data for a simple grid geometry
+				for ( let i = 0; i <= segments; i ++ ) {
+					const y = ( i * segmentSize ) - halfSize;
+					for ( let j = 0; j <= segments; j ++ ) {
+						const x = ( j * segmentSize ) - halfSize;
+						vertices.push( x, - y, 1.*Math.random() );
+						normals.push( 0, 0, 1 );
+						const r = ( x / size ) + 0.5;
+						const g = ( y / size ) + 0.5;
+						colors.push( r, g, 1 );
+					}
 
 				}
 
-				// scene.add( group );
+				// generate indices (data for element array buffer)
+				for ( let i = 0; i < segments; i ++ ) {
+					for ( let j = 0; j < segments; j ++ ) {
+						const a = i * ( segments + 1 ) + ( j + 1 );
+						const b = i * ( segments + 1 ) + j;
+						const c = ( i + 1 ) * ( segments + 1 ) + j;
+						const d = ( i + 1 ) * ( segments + 1 ) + ( j + 1 );
+						// generate two faces (triangles) per iteration
+						indices.push( a, b, d ); // face one
+						indices.push( b, c, d ); // face two
+					}
+				}
 
-				raycaster = new THREE.Raycaster();
+				geometry.setIndex( indices );
+				geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
+				geometry.setAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
+				geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
 
+				// const material = new THREE.MeshPhongMaterial( {
+				// 	side: THREE.DoubleSide,
+				// 	vertexColors: true
+				// } );
+				var material = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/grass2.jpg' ), opacity: .45, transparent:true, fog: true });
+				material.map.offset.set( 0, 0 );
+				material.map.repeat.set( 16, 16 );
+				material.map.wrapS=THREE.MirroredRepeatWrapping;
+				material.map.wrapT=THREE.MirroredRepeatWrapping;
+
+				var mesh = new THREE.Mesh( geometry, material );
+				mesh.position.set(0,0,-2)
+				mesh.rotateX(Math.PI * 0.5);
+
+				scene.add( mesh );
+			}
+			
+			function initRenderer(){
 				renderer = new THREE.WebGLRenderer( { antialias: true } );
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				renderer.outputEncoding = THREE.sRGBEncoding;
 				renderer.xr.enabled = true;
 				container.appendChild( renderer.domElement );
+			}
 
-				//
+			function initCameraAndLights(){
+				user = new THREE.Group();
+				user.position.set(0,0,0);
+				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 100 );
+				camera.position.set( 0, 1.6, 3);
+				user.add( camera );
+				scene.add( user );
 
-				function onSelectStart() {
-
-					this.userData.isSelecting = true;
-
+				if(window.location.href.indexOf("localhost")!=-1){
+					user.rotateX(-1);
 				}
 
+				scene.add( new THREE.HemisphereLight( 0x606060, 0x404040 ) );
+				const light = new THREE.DirectionalLight( 0xffffff );
+				light.position.set( 1, 1, 1 ).normalize();
+				scene.add( light );
+
+				console.log(camera.getWorldQuaternion())
+			}
+
+			function initControllers(){
+				function onSelectStart() {
+					this.userData.isSelecting = true;
+				}
 				function onSelectEnd() {
-
 					this.userData.isSelecting = false;
-
+				}
+				function onSqueezeStart() {
+					this.userData.isSqueezing = true;
+				}
+				function onSqueezeEnd() {
+					this.userData.isSqueezing = false;
 				}
 
 				controller = renderer.xr.getController( 0 );
 				controller.addEventListener( 'selectstart', onSelectStart );
 				controller.addEventListener( 'selectend', onSelectEnd );
+				controller.addEventListener( 'squeezestart', onSqueezeStart );
+				controller.addEventListener( 'squeezeend', onSqueezeEnd );
+
+				controller2 = renderer.xr.getController( 1 );
+				controller2.addEventListener( 'selectstart', onSelectStart );
+				controller2.addEventListener( 'selectend', onSelectEnd );
+				controller2.addEventListener( 'squeezestart', onSqueezeStart );
+				controller2.addEventListener( 'squeezeend', onSqueezeEnd );
+
 				controller.addEventListener( 'connected', function ( event ) {
-
 					this.add( buildController( event.data ) );
-
 				} );
 				controller.addEventListener( 'disconnected', function () {
-
 					this.remove( this.children[ 0 ] );
-
+				} );
+				controller2.addEventListener( 'connected', function ( event ) {
+					this.add( buildController( event.data ) );
+				} );
+				controller2.addEventListener( 'disconnected', function () {
+					this.remove( this.children[ 0 ] );
 				} );
 				scene.add( controller );
+				scene.add( controller2 );
 
 				const controllerModelFactory = new XRControllerModelFactory();
 
 				controllerGrip = renderer.xr.getControllerGrip( 0 );
 				controllerGrip.add( controllerModelFactory.createControllerModel( controllerGrip ) );
 				scene.add( controllerGrip );
-
-				window.addEventListener( 'resize', onWindowResize );
-
-				//
-
-				document.body.appendChild( VRButton.createButton( renderer ) );
-
+				controllerGrip2 = renderer.xr.getControllerGrip( 1 );
+				controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
+				scene.add( controllerGrip2 );
 			}
 
+			function addControlPanel(){
+
+				function addPlaneButton(x,y,zOffset,w,h,color,name){
+					var geometry = new THREE.PlaneGeometry( w, h );
+					var material = new THREE.MeshBasicMaterial( {color: color, side: THREE.DoubleSide} );
+					var plane = new THREE.Mesh( geometry, material );
+					plane.position.set(x,y,-2-zOffset);
+					plane.name=name;
+					if(plane.name=="background"){
+						plane.lastSelectTime=new Date().getTime();
+					}
+					plane.onSelect=function(INTERSECTED,controller){
+						if(this.name.indexOf("brush")!=-1){
+							if(this.name!=brush){
+								INTERSECTED.material.color={"r":.05, "g":.05, "b":.3};
+							}
+						}else if(this.name.indexOf("panel")==-1){
+							INTERSECTED.material.color={"r":.05, "g":.05, "b":.3};
+						}
+						if ( controller.userData.isSelecting === true ){
+							if(this.name=="left"){
+							user.rotation.y-=.005;
+							}
+							if(this.name=="right"){
+								user.rotation.y+=.005;
+							}
+							if(this.name=="up"){
+								yOffeset+=.05;
+							}
+							if(this.name=="down"){
+								yOffeset-=.05;
+							}
+							if(this.name=="background"){
+								if( (new Date().getTime() - this.lastSelectTime) > 400){
+									selectedBackground=selectedBackground+1;
+									if(selectedBackground>=6){
+										selectedBackground=1;
+									}
+									loadShaderPreset(selectedBackground);
+									this.lastSelectTime=new Date().getTime();
+								}
+							}
+							if(this.name.indexOf("brush")!=-1){
+								brush=this.name;
+								for(var x=0; x<controlsGroup.children.length; x++){
+									if(controlsGroup.children[x].name.indexOf("brush")!=-1){
+										controlsGroup.children[x].material.color={"r":.13, "g":.13, "b":.13}
+									}
+								}
+								INTERSECTED.material.color={"r":.05, "g":.5, "b":.15};
+							}
+						}						
+					}
+					plane.onDeselect=function(INTERSECTED,controller){
+						for(var x=0; x<controlsGroup.children.length; x++){
+							if(controlsGroup.children[x].name=="right" || controlsGroup.children[x].name=="left" || controlsGroup.children[x].name=="up" || controlsGroup.children[x].name=="down" ){
+								controlsGroup.children[x].material.color={"r":.13, "g":.13, "b":.13}
+								if(brush==this.name){
+									INTERSECTED.material.color={"r":.05, "g":.5, "b":.15};
+								}else{
+									INTERSECTED.material.color={"r":.13, "g":.13, "b":.13}
+								}
+							}
+						}
+						if(this.name=="brush1" || this.name=="brush2" || this.name=="brush3"){
+							if(brush==this.name){
+								INTERSECTED.material.color={"r":.05, "g":.5, "b":.15};
+							}else{
+								INTERSECTED.material.color={"r":.13, "g":.13, "b":.13}
+							}
+						}
+					}
+					return plane;
+				}
+
+				controlsGroup=new THREE.Group();
+				controlsGroup.add( addPlaneButton(.57,1,0,.5,.5,0x222222,"left") );
+				controlsGroup.add( addPlaneButton(-.57,1,0,.5,.5,0x222222,"right") );
+				controlsGroup.add( addPlaneButton(0,1.6,0,.5,.5,0x222222,"up") );
+				controlsGroup.add( addPlaneButton(0,.4,0,.5,.5,0x222222,"down") );
+				controlsGroup.add( addPlaneButton(0,1.,0,.5,.5,0x222222,"background") );
+				var brush1PlaneButton=addPlaneButton(1.8,.4,0,.5,.5,0x222222,"brush1");
+				INTERSECTED=brush1PlaneButton;
+				brush1PlaneButton.onDeselect(brush1PlaneButton);
+				controlsGroup.add(brush1PlaneButton);
+				controlsGroup.add( addPlaneButton(1.8,1.005,0,.5,.5,0x222222,"brush2") );
+				controlsGroup.add( addPlaneButton(1.8,1.6,0,.5,.5,0x222222,"brush3") );
+
+				controlsGroup.rotateX(6.28/4);
+				controlsGroup.position.x=-.4;
+				controlsGroup.position.y=-2.5;
+				controlsGroup.position.z=-3.5;
+				controlsGroup.scale.set(.5,.5,.5);
+				scene.add(controlsGroup);
+
+				var panelGroup=new THREE.Group();
+				panelGroup.add( addPlaneButton(.75,.825,-.02,4,2.5,0x20202,"panelBackground") );
+				panelGroup.add( addPlaneButton(.75,.8,-.04,4.25,2.75,0x303030,"panelBorder") );
+				panelGroup.rotateX(6.28/4);
+				panelGroup.position.x=-.4;
+				panelGroup.position.y=-2.5;
+				panelGroup.position.z=-3.5;
+				panelGroup.scale.set(.45,.45,.45);
+				scene.add(panelGroup);
+			}
+			
+			function createHemisphereMap(){
+				var radius = 60;
+				var radialSegments = 32;
+				var hsmaterial = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/stars3.jpg' ), opacity: .34, transparent:true, fog: true });
+				var hemiSphereGeom = new THREE.SphereBufferGeometry(radius, radialSegments, Math.round(radialSegments / 4), 0, Math.PI * 2, 0, Math.PI * 0.5);
+				var hemiSphere = new THREE.Mesh(hemiSphereGeom, hsmaterial);
+				var capGeom = new THREE.CircleBufferGeometry(radius, radialSegments);
+				capGeom.rotateX(Math.PI * 0.5);
+				var hfmaterial = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, map: new THREE.TextureLoader().load( 'assets/grass2.jpg' ),  bumpScale:1, bumpMap: new THREE.TextureLoader().load( 'assets/grass2.jpg' ), opacity: .095, transparent:true, fog: true });
+				hfmaterial.map.offset.set( 0, 0 );
+				hfmaterial.map.repeat.set( 16, 16 );
+				hfmaterial.map.wrapS=THREE.MirroredRepeatWrapping;
+				hfmaterial.map.wrapT=THREE.MirroredRepeatWrapping;
+				var cap = new THREE.Mesh(capGeom, hfmaterial);
+				hemiSphere.add(cap);
+				hemiSphere.position.y=-1.5;
+				return hemiSphere;
+			}
+
+			function createShaderSphereMap(){
+				var radius = 60;
+				var radialSegments = 32;
+				var mat = initShaderMaterial();
+				var geo = new THREE.SphereGeometry( radius, radialSegments, radialSegments );
+				var sphere = new THREE.Mesh(geo, mat);
+				sphere.rotateY(2*3.14*.25)
+				return sphere;
+			}
+			
+			function addBackgroundSprites(){
+				var geometry = new THREE.BufferGeometry();
+				var vertices = [];
+				var materials = [];
+
+				var textureLoader = new THREE.TextureLoader();
+
+				var sprite1 = textureLoader.load( 'sprites/sprite2.png' );
+				var sprite2 = textureLoader.load( 'sprites/sprite2.png' );
+				var sprite3 = textureLoader.load( 'sprites/sprite3.png' );
+
+				for ( var i = 0; i < 10000; i ++ ) {
+
+					var x = Math.random() * 1000 - 500;
+					var y = Math.random() * 1000 - 500;
+					var z = Math.random() * 1000 - 500;
+
+					vertices.push( x, y, z );
+
+				}
+
+				geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
+
+				var parameters = [
+					[[ 1.0, 1.0, 1.0 ], sprite1, 30 ],
+					[[ .5, 0.9, 1.0 ], sprite2, 20 ],
+					[[ .6, 1.0, 0.5 ], sprite3, 25 ]
+				];
+
+				for ( var i = 0; i < parameters.length; i ++ ) {
+
+					var color = parameters[ i ][ 0 ];
+					var sprite = parameters[ i ][ 1 ];
+					var size = parameters[ i ][ 2 ];
+
+					materials[ i ] = new THREE.PointsMaterial( { size: size, map: sprite, blending: THREE.AdditiveBlending, depthTest: false, transparent: true } );
+					materials[ i ].color.setHSL( color[ 0 ], color[ 1 ], color[ 2 ] );
+
+					var particles = new THREE.Points( geometry, materials[ i ] );
+
+					particles.rotation.x = Math.random() * 6;
+					particles.rotation.y = Math.random() * 6;
+					particles.rotation.z = Math.random() * 6;
+					particles.class="backgroundParticles";
+					particles.update=function(){
+						var time = Date.now() * 0.00005;
+						this.rotation.x = time/7 * ( i < 4 ? i + 1 : - ( i + 1 ) );
+						this.rotation.y = time/7 * ( i < 4 ? i + 1 : - ( i + 1 ) );
+					}
+
+					scene.add( particles );
+
+				}
+			}
+			
 			function buildController( data ) {
 
 				let geometry, material;
@@ -260,152 +605,95 @@
 			}
 
 			function animate() {
-
 				renderer.setAnimationLoop( render );
-
 			}
-
-			function setOpacity( obj, opacity ) {
-				obj.children.forEach((child)=>{
-					setOpacity( child, opacity );
-				});
-				if ( obj.material ) {
-					obj.material.opacity = opacity ;
-				};
-			};
 					
 			function keyHandler(event){
 				if(event.key=="s" && event.type=="keypress"){
-					sPressed=true;
+					console.log("s down");
 				}
 				if(event.key=="s" && event.type=="keyup"){
-					sPressed=false;
+					console.log("s up");
 				}
-				console.log("sPressed: "+sPressed);
+			}
+			
+			function calculateIntersects(){
+				var controllerObject=controller;
+				var controller1HasIntersects=false;
+				tempMatrix.identity().extractRotation( controllerObject.matrixWorld )
+				raycaster.ray.origin.setFromMatrixPosition( controllerObject.matrixWorld );
+				raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( tempMatrix );
+				var intersects = raycaster.intersectObjects( controlsGroup.children );
+				if ( intersects.length > 0 ) {
+						INTERSECTED = intersects[ 0 ].object;
+						INTERSECTED.onSelect(INTERSECTED,controllerObject);
+						controller1HasIntersects=true;
+				}
+
+				controllerObject=controller2;
+				var controller2HasIntersects=false;
+				tempMatrix.identity().extractRotation( controllerObject.matrixWorld )
+				raycaster.ray.origin.setFromMatrixPosition( controllerObject.matrixWorld );
+				raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( tempMatrix );
+				intersects = raycaster.intersectObjects( controlsGroup.children );
+				if ( intersects.length > 0 ) {
+						INTERSECTED = intersects[ 0 ].object;
+						INTERSECTED.onSelect(INTERSECTED,controllerObject);
+						controller2HasIntersects=true;
+				}
+
+
+				if(controller1HasIntersects==false && controller2HasIntersects==false){
+					if(INTERSECTED!=undefined){
+						INTERSECTED.onDeselect(INTERSECTED,controllerObject)
+					}
+					INTERSECTED = undefined;
+				}
+
+				if(controller1HasIntersects==false && controller2HasIntersects==false){
+					return "none";
+				}else if(controller1HasIntersects==true && controller2HasIntersects==false){
+					return "oneOnly";
+				}else if(controller1HasIntersects==false && controller2HasIntersects==true){
+					return "twoOnly";
+				}else{
+					return "both";
+				}
 			}
 			
 			function render() {
-				const delta = clock.getDelta() * 60;
-				var currentTime=new Date().getTime();
-				if ( controller.userData.isSelecting === true || sPressed==true) {
-					const cube = room.children[ 0 ];
-					cube.triggerTime=new Date().getTime();
-					cube.alphaIndex=1;
-					room.remove( cube );
 
-					cube.position.copy( controller.position );
-					cube.userData.velocity.x = ( Math.random() - 0.5 ) * 0.02 * delta;
-					cube.userData.velocity.y = ( Math.random() - 0.5 ) * 0.02 * delta;
-					cube.userData.velocity.z = ( Math.random() * 0.01 - 0.05 ) * delta;
-					cube.userData.velocity.applyQuaternion( controller.quaternion );
-					cube.scale.set(.05,.05,.05);
-					room.add( cube );
-					setOpacity( cube, 1.0 );
-				}
+				uniforms1[ "time" ].value += .01 * 5;
 
-				for(var x=0; x<8; x++){
-					var cube = room.children[ x ];
-					var a=1000;
-					var b=1005;
-					var c=10000;
-					var burstSpeed=.27;
-					var fadeSpeed=0.04;
-					if( Math.abs(currentTime-cube.triggerTime) > a &&  Math.abs(currentTime-cube.triggerTime) <= b ){
-						cube.scale.x+=burstSpeed;
-						cube.scale.y+=burstSpeed;
-						cube.scale.z+=burstSpeed;
-					}
-					if( Math.abs(currentTime-cube.triggerTime) > b &&  Math.abs(currentTime-cube.triggerTime) <= c ){
-						cube.scale.x+=.1;
-						cube.scale.y+=.1;
-						cube.scale.z+=.1;
-						cube.alphaIndex-=fadeSpeed;
-						setOpacity( cube, cube.alphaIndex );
+				var menuSelection=calculateIntersects();
+
+				if(menuSelection!="oneOnly" && menuSelection!="both"){
+					if ( controller.userData.isSelecting === true ){
+						addObject(0,0,0,false,1,"select1");
 					}
 				}
-				
 
-				tempMatrix.identity().extractRotation( controller.matrixWorld );
-
-				raycaster.ray.origin.setFromMatrixPosition( controller.matrixWorld );
-				raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( tempMatrix );
-
-				const intersects = raycaster.intersectObjects( room.children );
-
-				if ( intersects.length > 0 ) {
-
-					if ( INTERSECTED != intersects[ 0 ].object ) {
-
-						if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-
-						INTERSECTED = intersects[ 0 ].object;
-						INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-						INTERSECTED.material.emissive.setHex( 0xff0000 );
-
+				if(menuSelection!="twoOnly" && menuSelection!="both"){
+					if ( controller2.userData.isSelecting === true ){
+						addObject(0,0,0,false,2,"select2");
 					}
-
-				} else {
-
-					if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-
-					INTERSECTED = undefined;
-
 				}
-
-				// Keep cubes inside room
-
-				for ( let i = 0; i < room.children.length; i ++ ) {
-
-					const cube = room.children[ i ];
-
-					cube.userData.velocity.multiplyScalar( 1 - ( 0.001 * delta ) );
-
-					cube.position.add( cube.userData.velocity );
-
-					if ( cube.position.x < - 3 || cube.position.x > 3 ) {
-
-						cube.position.x = THREE.MathUtils.clamp( cube.position.x, - 3, 3 );
-						cube.userData.velocity.x = - cube.userData.velocity.x;
-
-					}
-
-					if ( cube.position.y < 0 || cube.position.y > 6 ) {
-
-						cube.position.y = THREE.MathUtils.clamp( cube.position.y, 0, 6 );
-						cube.userData.velocity.y = - cube.userData.velocity.y;
-
-					}
-
-					if ( cube.position.z < - 3 || cube.position.z > 3 ) {
-
-						cube.position.z = THREE.MathUtils.clamp( cube.position.z, - 3, 3 );
-						cube.userData.velocity.z = - cube.userData.velocity.z;
-
-					}
-
-					cube.rotation.x += cube.userData.velocity.x * 2 * delta;
-					cube.rotation.y += cube.userData.velocity.y * 2 * delta;
-					cube.rotation.z += cube.userData.velocity.z * 2 * delta;
-
+				if ( controller.userData.isSqueezing === true ){
+					addObject(0,0,0,false,1,"squeeze1");
 				}
-
-				const time = Date.now() / 1000;
-
-				group.rotation.x = time * 0.01;
-				group.rotation.y = time * 0.005;
-                // group.scale.set(time/2%3,time/2%3,time/2%3);
-				// group.rotation.z = time * 1.0;
-
+				if ( controller2.userData.isSqueezing === true ){
+					addObject(0,0,0,false,2,"squeeze2");
+				}
+				for(var x=0; x<scene.children.length; x++){
+					if(scene.children[x].class=="object" || scene.children[x].class=="backgroundParticles"){
+						scene.children[x].update();
+					}
+				}
+				// camera.rotateY(.001);
 				renderer.render( scene, camera );
-
 			}
 
-            function createSpriteSphere(){
-                const amount = 6;
-				const radius = .5;
-
-
-                function rgbToHex(r, g, b) {
+			function rgbToHex(r, g, b) {
                     r=parseInt(r);
                     g=parseInt(g);
                     b=parseInt(b);
@@ -414,7 +702,10 @@
                         return hex.length == 1 ? "0" + hex : hex;
                     }
                     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
-                }
+            }
+
+            function createSpriteSphere(){
+				const radius = .5;
 
                 var xList=[];
                 var yList=[];
@@ -437,8 +728,12 @@
                 // console.log(gList);
 
 				group = new THREE.Group();
-                var spriteTexture=new THREE.TextureLoader().load( "sprites/sprite3.png" );
-				for ( let a = 0; a < amount*amount*amount; a ++ ) {                    var material = new THREE.SpriteMaterial( { map: spriteTexture, color: rgbToHex(rList[a],gList[a],bList[a]), fog: true, blending: THREE.AdditiveBlending, depthTest: false, transparent: true } );
+                var spriteTexture1=new THREE.TextureLoader().load( "sprites/sprite1.png" );
+				var spriteTexture2=new THREE.TextureLoader().load( "sprites/sprite2.png" );
+				var spriteTexture3=new THREE.TextureLoader().load( "sprites/sprite3.png" );
+				var spriteTextures=[spriteTexture1, spriteTexture2, spriteTexture3];
+				for ( let a = 0; a < amount*amount*amount; a ++ ) {                    
+					var material = new THREE.SpriteMaterial( { map: spriteTextures[a%3], color: rgbToHex(rList[a],gList[a],bList[a]), fog: true, blending: THREE.AdditiveBlending, depthTest: false, transparent: true } );
 
 					const x = xList[a];
 					const y = yList[a];
@@ -457,6 +752,290 @@
 				}
 				return group;
             }
+
+			function createColorIndex(){
+				var rList=[];
+				for(var x=0; x<255; x=x+10){
+					rList.push(x);
+				}
+
+				for(var x=255; x>0; x=x-10){
+					rList.push(x);
+				}
+				for(var x=0; x<255; x=x+10){
+					rList.push(0);
+				}
+				// console.log(rList);
+
+				var gList=[];
+				for(var x=0; x<255; x=x+10){
+					gList.push(0);
+				}
+				for(var x=0; x<255; x=x+10){
+					gList.push(x);
+				}
+				for(var x=255; x>0; x=x-10){
+					gList.push(x);
+				}
+				// console.log(gList);
+
+
+				var bList=[];
+				for(var x=255; x>0; x=x-10){
+					bList.push(x);
+				}
+				for(var x=0; x<255; x=x+10){
+					bList.push(0);
+				}
+
+				for(var x=0; x<255; x=x+10){
+					bList.push(x);
+				}
+
+				var colorIndex=[];
+				for(var x=0; x<rList.length; x=x+1){
+					colorIndex.push({"r":rList[x], "g":gList[x], "b":bList[x]});
+				}
+				// setInterval(function(){
+				// 	console.log(colorIndex[ parseInt(new Date().getTime()/200)%colorIndex.length]);
+				// },50)
+				return(colorIndex);
+			}
+
+			function addObject(x,y,z,isMirror,controllerNumber,button){
+
+				var mesh=init();
+
+				function init(){
+
+					function initBrush1(){
+						if(button=="squeeze2"){
+							var radius=.5;
+							var material = new THREE.MeshPhongMaterial( {color: rgbToHex(colorIndex[ parseInt(new Date().getTime()/200)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/200)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/200)%colorIndex.length].b)} );
+							var geometry = new THREE.SphereGeometry( radius, 44, 44 );
+							var mesh = new THREE.Mesh( geometry, material );
+							mesh.class="object";
+							mesh.createTime=new Date().getTime();	
+							mesh.velocity=new THREE.Vector3();
+							mesh.velocity.set(0,0,.004);
+							mesh.lifetime=7000;				
+						}else if(button=="squeeze1"){
+							// var spriteTexture=new THREE.TextureLoader().load( "sprites/sprite1.png" );                
+							// var material = new THREE.SpriteMaterial( { map: spriteTexture, fog: true, blending: THREE.AdditiveBlending, depthTest: false, transparent: true, color: rgbToHex(colorIndex[ parseInt(new Date().getTime()/25)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/25)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/25)%colorIndex.length].b) } );
+							// var mesh = new THREE.Sprite( material );
+							var radius=.5;
+							var material = new THREE.MeshPhongMaterial( {color: rgbToHex(colorIndex[ parseInt(new Date().getTime()/400)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/400)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/400)%colorIndex.length].b)} );
+							var geometry = new THREE.BoxGeometry( radius*2, radius*2, radius*2 );
+							var mesh = new THREE.Mesh( geometry, material );
+							mesh.rotateX((new Date().getTime()/400)%6.28)
+							mesh.rotateY((new Date().getTime()/800)%6.28)
+							mesh.class="object";
+							mesh.createTime=new Date().getTime();
+							mesh.velocity=new THREE.Vector3();
+							mesh.velocity.set(0,0,.0088);
+							mesh.lifetime=6000;
+						}else if(button=="select2"){
+							var radius=.19;
+							var material = new THREE.MeshPhongMaterial( {color: rgbToHex(colorIndex[ parseInt(new Date().getTime()/100)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/100)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/100)%colorIndex.length].b)} );
+							var geometry = new THREE.SphereGeometry( radius, 44, 44 );
+							var mesh = new THREE.Mesh( geometry, material );
+							mesh.class="object";
+							mesh.createTime=new Date().getTime();
+							mesh.velocity=new THREE.Vector3();
+							mesh.velocity.set(0,0,.015);
+							mesh.lifetime=6500;
+						}else if(button=="select1"){
+							var radius=.19;
+							var material = new THREE.MeshPhongMaterial( {color: rgbToHex(colorIndex[ parseInt(new Date().getTime()/150)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/150)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/150)%colorIndex.length].b)} );
+							var geometry = new THREE.BoxGeometry( radius*2, radius*2, radius*2 );
+							var mesh = new THREE.Mesh( geometry, material );
+							mesh.rotateX((new Date().getTime()/300)%6.28)
+							mesh.rotateY((new Date().getTime()/600)%6.28)
+							mesh.class="object";
+							mesh.createTime=new Date().getTime();
+							mesh.velocity=new THREE.Vector3();
+							mesh.velocity.set(0,0,.03);
+							mesh.lifetime=4000;
+						}
+						return mesh;
+					}
+
+					function initBrush2(){
+						if(button=="squeeze2"){
+							var radius1=.9;
+							var radius2=1.04;
+							if((new Date().getTime()/8000)%3>1.5){
+								var material = new THREE.MeshPhongMaterial( {color: 0xff0000, alpha:.9, side: THREE.DoubleSide} );
+							}else{
+								var material = new THREE.MeshPhongMaterial( {color: 0x0000ff, alpha:.9, side: THREE.DoubleSide} );
+							}
+							var geometry = new THREE.RingGeometry( radius1, radius2, 6 );
+							var mesh = new THREE.Mesh( geometry, material );
+							mesh.class="object";
+							mesh.createTime=new Date().getTime();	
+							mesh.velocity=new THREE.Vector3();
+							mesh.velocity.set(0,0,-.04);
+							mesh.rotateX((new Date().getTime()/400)%6.28)
+							mesh.lifetime=7000;				
+						}else if(button=="squeeze1"){
+							// var spriteTexture=new THREE.TextureLoader().load( "sprites/sprite1.png" );                
+							// var material = new THREE.SpriteMaterial( { map: spriteTexture, fog: true, blending: THREE.AdditiveBlending, depthTest: false, transparent: true, color: rgbToHex(colorIndex[ parseInt(new Date().getTime()/25)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/25)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/25)%colorIndex.length].b) } );
+							// var mesh = new THREE.Sprite( material );
+							var radius1=1.;
+							var radius2=1.2;
+							if((new Date().getTime()/7000)%3>1.5){
+								var material = new THREE.MeshPhongMaterial( {color: 0xffff00, alpha:.9, side: THREE.DoubleSide} );
+							}else{
+								var material = new THREE.MeshPhongMaterial( {color: 0x00ff00, alpha:.9, side: THREE.DoubleSide} );
+							}							var geometry = new THREE.RingGeometry( radius1, radius2, 1 );
+							var mesh = new THREE.Mesh( geometry, material );
+							mesh.rotateX((new Date().getTime()/400)%6.28)
+							mesh.rotateZ(.523)
+							mesh.class="object";
+							mesh.createTime=new Date().getTime();
+							mesh.velocity=new THREE.Vector3();
+							mesh.velocity.set(0,0,-.08);
+							mesh.lifetime=6000;
+						}else if(button=="select2"){
+							var radius1=.15;
+							var radius2=.25;
+							if((new Date().getTime()/8000)%3>1.5){
+								var material = new THREE.MeshPhongMaterial( {color: 0x0fff00, alpha:.9, side: THREE.DoubleSide} );
+							}else{
+								var material = new THREE.MeshPhongMaterial( {color: 0xff00ff, alpha:.9, side: THREE.DoubleSide} );
+							}
+							var geometry = new THREE.RingGeometry( radius1, radius2, 1 );
+							var mesh = new THREE.Mesh( geometry, material );
+							mesh.rotateX((new Date().getTime()/200)%6.28)
+							mesh.rotateZ(0.523);
+							mesh.class="object";
+							mesh.createTime=new Date().getTime();
+							mesh.velocity=new THREE.Vector3();
+							mesh.velocity.set(0,0,.015);
+							mesh.lifetime=6500;
+						}else if(button=="select1"){
+							var radius1=.19;
+							var radius2=.25;
+							var material = new THREE.MeshPhongMaterial( {color: rgbToHex(colorIndex[ parseInt(new Date().getTime()/100)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/100)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/100)%colorIndex.length].b), alpha:1, side: THREE.DoubleSide} );
+							var geometry = new THREE.RingGeometry( radius1, radius2, 12 );
+							var mesh = new THREE.Mesh( geometry, material );
+							mesh.rotateX((new Date().getTime()/250)%6.28)
+							mesh.rotateZ(0.523);
+							mesh.class="object";
+							mesh.createTime=new Date().getTime();
+							mesh.velocity=new THREE.Vector3();
+							mesh.velocity.set(0,0,.03);
+							mesh.lifetime=4000;
+						}
+						return mesh;
+					}
+
+					function initBrush3(){
+						if(button.indexOf("select")!="-1" ){
+							var radius=.02;
+							var colorValue=rgbToHex(2*colorIndex[ parseInt(new Date().getTime()/20)%colorIndex.length].r, 2*colorIndex[ parseInt(new Date().getTime()/20)%colorIndex.length].g, 2*colorIndex[ parseInt(new Date().getTime()/20)%colorIndex.length].b);
+							var material = new THREE.MeshPhongMaterial( {color: colorValue, side:THREE.DoubleSide, transparent:true, alphaMap: dotsTexture, opacity:1.5 } );
+							var geometry = new THREE.SphereGeometry( radius, 44, 44 );
+							var mesh = new THREE.Mesh( geometry, material );
+							mesh.class="object";
+							mesh.isFirework=true;
+							mesh.createTime=new Date().getTime();	
+							mesh.velocity=new THREE.Vector3();
+							mesh.velocity.set(0.,0.,-.46+(.01*Math.random()) );
+							mesh.scaleRate=1.7;
+							mesh.alphaRate=.04;
+							mesh.lifetime=1000+(Math.random()*500);
+							mesh.scaleTime=mesh.lifetime-700;				
+							return mesh;
+						}
+						if(button.indexOf("squeeze")!="-1" ){
+							var radius=.05;
+							var colorValue=rgbToHex(colorIndex[ parseInt(new Date().getTime()/5)%colorIndex.length].r, colorIndex[ parseInt(new Date().getTime()/5)%colorIndex.length].g, colorIndex[ parseInt(new Date().getTime()/5)%colorIndex.length].b);
+							var material = new THREE.MeshPhongMaterial( {color: colorValue, side:THREE.DoubleSide, transparent:true, alphaMap: dotsTexture } );
+							var geometry = new THREE.SphereGeometry( radius, 44, 44 );
+							var mesh = new THREE.Mesh( geometry, material );
+							mesh.class="object";
+							mesh.isFirework=true;
+							mesh.createTime=new Date().getTime();	
+							mesh.velocity=new THREE.Vector3();
+							mesh.velocity.set(0.,0.,-.28+(.01*Math.random()) );
+							mesh.scaleRate=.8;
+							mesh.alphaRate=.0068;
+							mesh.lifetime=3000+(Math.random()*1600);
+							mesh.scaleTime=mesh.lifetime-1600;				
+							mesh.materialNee
+							return mesh;
+						}
+					}
+
+					if(brush=="brush1"){
+						return initBrush1();
+					}
+					if(brush=="brush2"){
+						return initBrush2();
+					}
+					if(brush=="brush3"){
+						return initBrush3();
+					}				
+				}
+
+				mesh.update=function(){
+					if(this.isFirework==true){
+						if( Math.abs(this.createTime-(new Date().getTime())) > this.scaleTime ){
+							mesh.velocity.set(0.,0.,0.);
+							this.scale.set(this.scale.x+this.scaleRate,this.scale.y+this.scaleRate,this.scale.z+this.scaleRate)
+							this.material.opacity-=this.alphaRate;
+						}
+					}
+					if( Math.abs(this.createTime-(new Date().getTime())) > this.lifetime ){
+							scene.remove(this);
+							this.geometry.dispose();
+							this.material.dispose();
+					}else{
+						this.position.x+=this.velocity.x;
+						this.position.y+=this.velocity.y;
+						this.position.z+=this.velocity.z;
+					}
+				}
+
+				mesh.setInitialPositionWithMirroring=function(){
+					if(x==0 && y==0 && z==0 && isMirror==false){
+						if(brush=="brush1" || brush=="brush2" ){
+							if(controllerNumber==1){
+								mesh.position.copy( controller.position );
+								mesh.position.z=(mesh.position.z*20)+.25;
+								mesh.position.x=(mesh.position.x*12);
+								mesh.position.y=(mesh.position.y*12)-6.25+yOffeset;
+							}
+							if(controllerNumber==2){
+								mesh.position.copy( controller2.position );
+								mesh.position.z=(mesh.position.z*20)+.25;
+								mesh.position.x=(mesh.position.x*12);
+								mesh.position.y=(mesh.position.y*12)-6.25+yOffeset;							
+							}
+							addObject(mesh.position.x,mesh.position.y,mesh.position.z,true,controllerNumber,button)
+						} 
+						if(brush=="brush3"){
+							if(controllerNumber==1){
+								mesh.position.copy( controller.position );
+								mesh.velocity.applyQuaternion( controller.quaternion )
+							}
+							if(controllerNumber==2){
+								mesh.position.copy( controller2.position );	
+								mesh.velocity.applyQuaternion( controller2.quaternion )				
+							}							
+						}
+					}else{
+						mesh.position.set(-x,y,z);
+					}
+					if(window.location.href.indexOf("localhost")!=-1){
+						mesh.position.set(0,1,-10.5);
+					}
+				}
+
+				mesh.setInitialPositionWithMirroring();
+				scene.add(mesh);
+			}
 
 		</script>
 	</body>

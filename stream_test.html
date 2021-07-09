@@ -1,0 +1,218 @@
+<html>
+	<head>
+		<title>ShaderMapper</title>
+		<style>
+			img{
+				z-index: 11;
+				position:absolute;
+			}
+			body{
+			    margin:0px;
+				background-color:black;
+			}	
+			video{
+				opacity: 1;
+				width:100%;
+				height:100%;
+				top:0px;
+				left:0px;
+				z-index:-1;
+				transform:scale(-1,1);
+				position:fixed;
+				float:left;
+				object-fit:fill;
+			}
+			canvas{
+				opacity: 1;
+				width:100%;
+				height:100%;
+				top:0px;
+				left:0px;
+				z-index:10;
+				transform:scale(1,1);
+				position:fixed;
+				float:left;
+				object-fit:fill;
+				/* cursor: none; */
+			}
+			video{
+				opacity: 1;
+				width:100%;
+				height:100%;
+				top:0px;
+				left:0px;
+				z-index:-1;
+				transform:scale(-1,1);
+				position:fixed;
+				float:left;
+				object-fit:fill;
+			}
+		</style>
+	</head>
+	<body onclick="requestFullScreen();">
+		<script src="dependancies/three.js"></script>
+		<script src="dependancies/pixel8.js"></script>
+		<script src="dependancies/dat.gui.min.js"></script>
+		<script src="dependancies/Detector.js"></script>
+		<script src="dependancies/NURBSSurface.js"></script>
+		<script src="dependancies/NURBSUtils.js"></script>
+		<script src="dependancies/TrackballControls.js"></script> 
+		<img width="256" height="256" id="streamInput" style="z-index:11;" crossorigin="Anonymous" src="http://192.168.0.72:4747/video"></img>
+		<!-- <img width="256" height="256" id="streamInput" style="z-index:11;" crossorigin="Anonymous" src="http://localhost/assets/grass2.jpg"></img> -->
+	
+		<script>
+			let camera, scene, renderer, mesh, mouse, raycaster, selected, texture;
+			var streamData = new Uint8Array( 4 * 256 );
+			var isFirst=true;
+			init();
+			animate();
+
+			function requestFullScreen() {
+				// Supports most browsers and their versions.
+				var element = document.body; // Make the body go full screen.
+				var requestMethod = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || element.msRequestFullScreen;
+			
+				if (requestMethod) { // Native full screen.
+					requestMethod.call(element);
+				} else if (typeof window.ActiveXObject !== "undefined") { // Older IE.
+					var wscript = new ActiveXObject("WScript.Shell");
+					if (wscript !== null) {
+						wscript.SendKeys("{F11}");
+					}
+				}
+			}
+
+			function initStreamInput(){
+				var img = document.getElementById("streamInput");
+				img.crossOrigin="Anonymous";
+				img.style.display='none';
+				var canvas = document.createElement('canvas');
+				canvas.style.display='none';
+				canvas.id="streamDataCanvas"
+				canvas.style.position='absolute';
+				canvas.width = img.width;
+				canvas.height = img.height;
+				canvas.style.backgroundColor='red';
+				canvas.style.zIndex=13;
+				canvas.style.left=img.width+'px';
+				canvas.style.width=img.width+'px';
+				canvas.style.height=img.height+'px';
+				document.body.appendChild(canvas)
+
+				setInterval(function(){
+					var img = document.getElementById("streamInput");
+					img.crossOrigin="Anonymous";
+					var canvas = document.getElementById('streamDataCanvas');
+					canvas.width = img.width;
+					canvas.height = img.height;
+					canvas.getContext('2d').drawImage(img, 0, 0, img.width, img.height);
+					// streamData=canvas.getContext('2d').getImageData(0,0,img.width,img.height).data;
+					mesh.material.map = new THREE.CanvasTexture( canvas );
+					mesh.material.map.needsUpdate=true;
+					// console.log(streamData);
+				},100);
+			}
+
+			function init() {
+				camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 1000 );
+				camera.position.z = 400;
+				selected=null;
+
+				scene = new THREE.Scene();
+				const light = new THREE.AmbientLight( 0xffffff, 2. ); // soft white light
+				scene.add( light );
+
+				texture = new THREE.TextureLoader().load( 'assets/paul.jpg' );
+				const geometry = new THREE.PlaneBufferGeometry(  window.innerWidth, window.innerHeight, 1, 1  );
+
+				var positionAttribute = geometry.attributes.position;
+				console.log( positionAttribute );
+				positionAttribute.setY(0, positionAttribute.getY(0)+40);
+				positionAttribute.setX(0, positionAttribute.getX(0)-40);
+				for(var i=0; i<positionAttribute.count; i++){
+					// positionAttribute.setX(i, positionAttribute.getX(i)+40);
+					console.log(positionAttribute.getX(i)+", "+positionAttribute.getY(i));
+
+					const circle = new THREE.Mesh( new THREE.CircleGeometry( 15, 32 ) , new THREE.MeshBasicMaterial( { color: 0x0000ff } ) );
+					circle.position.x=positionAttribute.getX(i);
+					circle.position.y=positionAttribute.getY(i);
+					circle.position.z+=1;
+					circle.class="handle";
+					circle.idNumber=i;
+					scene.add( circle );
+				}
+
+
+				const material = new THREE.MeshStandardMaterial( { map: texture, side:THREE.DoubleSide, displacementScale: 0, displacementMap: new THREE.TextureLoader().load( 'assets/noise.jpg' ) } );
+				mesh = new THREE.Mesh( geometry, material );
+				scene.add( mesh );
+
+				raycaster = new THREE.Raycaster();
+				mouse = new THREE.Vector2();
+				window.addEventListener( 'mousedown', onMouseDown, false );
+				window.addEventListener( 'mousemove', onMouseMove, false );
+				window.addEventListener( 'mouseup', onMouseUp, false );
+
+
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				document.body.appendChild( renderer.domElement );
+				window.addEventListener( 'resize', onWindowResize );
+
+				initStreamInput();
+
+			}
+
+			function onMouseDown( event ) {
+				mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+				mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+				
+				raycaster.setFromCamera( mouse, camera );
+				intersects = raycaster.intersectObjects( scene.children );
+				if(intersects.length!=0){
+					if(intersects[0].object.class=="handle"){
+						selected=intersects[0].object;
+						// console.log(selected);
+					}
+				}
+			}selected
+
+			function onMouseMove( event ) {
+				// console.log(event)
+				mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+				mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+				if(selected!=null){
+					if(selected.class=="handle"){
+						console.log(mesh);
+						mesh.geometry.attributes.position.setX(selected.idNumber, mesh.geometry.attributes.position.getX(selected.idNumber)+event.movementX*2 );
+						mesh.geometry.attributes.position.setY(selected.idNumber, mesh.geometry.attributes.position.getY(selected.idNumber)-event.movementY*2 );
+						mesh.geometry.attributes.position.needsUpdate = true;
+						selected.position.x+=event.movementX*2;
+						selected.position.y-=event.movementY*2;
+					}
+				}
+				// for ( let i = 0; i < intersects.length; i ++ ) {
+				// 	intersects[ i ].object.material.color.set( 0xff0000 );
+				// }
+			}
+
+			function onMouseUp( event ) {
+				selected=null;
+			}
+
+			function onWindowResize() {
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+			}
+
+			function animate() {
+				requestAnimationFrame( animate );
+				renderer.render( scene, camera );
+			}
+		</script>
+	</body>
+</html>
+
