@@ -3,6 +3,25 @@
 	<title>Nimbus Labs</title>
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 	<style>
+		#music{
+			position:absolute;
+			top:110px;
+			display:none;
+		    grid-template-columns: auto auto auto auto auto;
+			grid-template-rows: 7% 20% 7% 20%;
+			left:5.5%;
+			width:85%;
+			height:90%;
+			/* background-color: #222222; */
+			color:white;
+		}
+		.music-grid-item{
+			border: 1px solid rgba(0, 0, 0, 0.8);
+			padding: 20px;
+			font-size: 18px;
+			text-align: center;
+			width:90%
+		}
 		@media only screen and (min-width:900px){
 			body{
 				margin:0px;
@@ -243,6 +262,14 @@
 				display:none;
 				left:5%;
 			}
+			#mandlebulbs{
+				width:100%;
+				position:relative;
+				top:22px;
+				display:none;
+				left:5%;
+				background-color: blueviolet;
+			}
 			.mandlebulb-item{
 				width:90%;
 				margin-bottom: 10px;
@@ -290,7 +317,7 @@
 			<div class="header-item"></div>
 			<div class="header-item"></div>
 			<div class="header-item"></div>
-			<div class="header-item"></div>
+			<div class="header-item" onclick="goToPage('music');">Music</div>
 			<div class="header-item" onclick="goToPage('mandlebulbs');">Mandlebulbs</div>
 			<div class="header-item" onclick="goToPage('ShaderMapper Demo');">ShaderMapper</div>
 			<div class="header-item" onclick="goToPage('FlowMapper Demo');">FlowMapper</div>
@@ -313,6 +340,8 @@
 
 		<div id="mandlebulbs"></div>
 
+		<div id="music"></div>
+
 		<div id="about">
 			<video id="expRecapVideo" controls style="display:none">
 				<source src="http://www.nimbuslaboratory.com/static/NimbusPi/Experiment_009_Recap.mp4" type="video/mp4">
@@ -325,16 +354,28 @@
 			initGlobalVars();
 			function initGlobalVars(){
 				hasLoadedMandleBulbs=false;
+				hasLoadedMusic=false;
 				document.getElementById('mandlebulbs')
 			}
 
 			function goToPage(pageName){
 				document.getElementById('mobile-dropdown').style.display='none';
+				if(pageName=="music"){
+					if(!hasLoadedMusic){
+						loadMusic();
+						hasLoadedMusic=true;
+					}
+					document.getElementById('music').style.display="grid";
+					document.getElementById('mandlebulbs').style.display="none";
+					document.getElementById('renderCanvas').style.display="none";
+					document.getElementById('about').style.display="none";
+				}
 				if(pageName=="mandlebulbs"){
 					if(!hasLoadedMandleBulbs){
 						loadMandlebulbs();
 						hasLoadedMandleBulbs=true;
 					}
+					document.getElementById('music').style.display="none";
 					document.getElementById('mandlebulbs').style.display="inline";
 					document.getElementById('renderCanvas').style.display="none";
 					document.getElementById('about').style.display="none";
@@ -346,6 +387,7 @@
 					window.location.href="http://www.nimbuslaboratory.com/ShaderMapper.html";
 				}
 				if(pageName=="about"){
+					document.getElementById('music').style.display="none";
 					document.getElementById('mandlebulbs').style.display="none";
 					document.getElementById('renderCanvas').style.display="none";
 					document.getElementById('about').style.display="inline";
@@ -354,6 +396,30 @@
 					console.log("click")
 					window.location.href=window.location.href;
 				}
+			}
+
+			function loadMusic(){
+				document.getElementById('music').innerHTML='\
+				<div class="music-grid-item" > NeatFreak   - All </div> \
+				<div class="music-grid-item" > NeatFreak   - Drums</div> \
+				<div class="music-grid-item" > NeatFreak   - Bass</div> \
+				<div class="music-grid-item" > NeatFreak   - Pluck</div> \
+				<div class="music-grid-item" > NeatFreak    - FX</div> \
+				<audio controls class="music-grid-item" > <source src="horse.wav" type="audio/wav"> Your browser does not support the audio element. </audio> \
+				<audio controls class="music-grid-item" > <source src="horse.wav" type="audio/wav"> Your browser does not support the audio element. </audio> \
+				<audio controls class="music-grid-item" > <source src="horse.wav" type="audio/wav"> Your browser does not support the audio element. </audio> \
+				<audio controls class="music-grid-item" > <source src="horse.wav" type="audio/wav"> Your browser does not support the audio element. </audio> \
+				<audio controls class="music-grid-item" > <source src="horse.wav" type="audio/wav"> Your browser does not support the audio element. </audio> \
+				<div class="music-grid-item" > PluckIt - All </div> \
+				<div class="music-grid-item" > PluckIt - Drums</div> \
+				<div class="music-grid-item" > PluckIt - Bass</div> \
+				<div class="music-grid-item" > PluckIt - Pluck</div> \
+				<div class="music-grid-item" > PluckIt  - FX</div> \
+				<audio controls class="music-grid-item" > <source src="horse.wav" type="audio/wav"> Your browser does not support the audio element. </audio> \
+				<audio controls class="music-grid-item" > <source src="horse.wav" type="audio/wav"> Your browser does not support the audio element. </audio> \
+				<audio controls class="music-grid-item" > <source src="horse.wav" type="audio/wav"> Your browser does not support the audio element. </audio> \
+				<audio controls class="music-grid-item" > <source src="horse.wav" type="audio/wav"> Your browser does not support the audio element. </audio> \
+				<audio controls class="music-grid-item" > <source src="horse.wav" type="audio/wav"> Your browser does not support the audio element. </audio>'
 			}
 
 			function loadMandlebulbs(){
