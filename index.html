@@ -26,7 +26,7 @@
 		#music{
 			position:absolute;
 			top:110px;
-			display:inline;
+			display:none;
 		    /* grid-template-columns: auto; */
 			/* grid-template-rows: 10% 20% 10% 20%; */
 			left:5%;
@@ -354,7 +354,7 @@
 		<div id="mandlebulbs"></div>
 
 		<div id="music">
-			<h2>NeatFreat</h2>
+			<!-- <h2>NeatFreat</h2>
 			<h5>90 BPM - 64 Bars - A minor</h5>
 			<h5>Download: 
 				<a class="download-link" href="http://www.nimbuslaboratory.com/static/music/NeatFreak/NeatFreak%20-%20All.wav" download>  All Tracks  &#8226; </a>
@@ -375,7 +375,7 @@
 				<a class="download-link" href="http://www.nimbuslaboratory.com/static/music/PluckIt/Pluckit%20-%20Lead.wav" download>  Lead  &#8226; </a>
 				<a class="download-link" href="http://www.nimbuslaboratory.com/static/music/PluckIt/Pluckit%20-%20FX.wav" download>  Fx  </a>
 			</h5>
-			<audio controls class="music-player" > <source src="http://www.nimbuslaboratory.com/static/music/PluckIt/Pluckit%20-%20All.wav" type="audio/wav"> Your browser does not support the audio element. </audio>
+			<audio controls class="music-player" > <source src="http://www.nimbuslaboratory.com/static/music/PluckIt/Pluckit%20-%20All.wav" type="audio/wav"> Your browser does not support the audio element. </audio> -->
 		</div>
 
 		<div id="about">
@@ -436,7 +436,28 @@
 
 			function loadMusic(){
 				document.getElementById('music').innerHTML=document.getElementById('music').innerHTML+'\
-				<audio controls class="music-player" > <source src="http://www.nimbuslaboratory.com/static/music/NeatFreak/NeatFreak%20-%20All.wav" type="audio/wav"> Your browser does not support the audio element. </audio>'
+				<h2>NeatFreat</h2> \
+				<h5>90 BPM - 64 Bars - A minor</h5> \
+				<h5>Download: \
+					<a class="download-link" href="http://www.nimbuslaboratory.com/static/music/NeatFreak/NeatFreak%20-%20All.wav" download>  All Tracks  &#8226; </a> \
+					<a class="download-link" href="http://www.nimbuslaboratory.com/static/music/NeatFreak/NeatFreak%20-%20Drums.wav" download>  Drums  &#8226; </a> \
+					<a class="download-link" href="http://www.nimbuslaboratory.com/static/music/NeatFreak/NeatFreak%20-%20Bass.wav" download>  Bass  &#8226; </a> \
+					<a class="download-link" href="http://www.nimbuslaboratory.com/static/music/NeatFreak/NeatFreak%20-%20Piano.wav" download>  Piano  &#8226; </a> \
+					<a class="download-link" href="http://www.nimbuslaboratory.com/static/music/NeatFreak/NeatFreak%20-%20Strings.wav" download>  Strings  </a> \
+				</h5> \
+				<audio controls class="music-player" > <source src="http://www.nimbuslaboratory.com/static/music/NeatFreak/NeatFreak%20-%20All.wav" type="audio/wav"> Your browser does not support the audio element. </audio> \
+				<br> \
+				<br> \
+				<h2>PluckIt</h2> \
+				<h5>90 BPM - 64 Bars - A minor</h5> \
+				<h5>Download: \
+					<a class="download-link" href="http://www.nimbuslaboratory.com/static/music/PluckIt/Pluckit%20-%20All.wav" download>  All Tracks  &#8226; </a> \
+					<a class="download-link" href="http://www.nimbuslaboratory.com/static/music/PluckIt/Pluckit%20-%20Drums.wav" download>  Drums  &#8226; </a> \
+					<a class="download-link" href="http://www.nimbuslaboratory.com/static/music/PluckIt/Pluckit%20-%20Bass.wav" download>  Bass  &#8226; </a> \
+					<a class="download-link" href="http://www.nimbuslaboratory.com/static/music/PluckIt/Pluckit%20-%20Lead.wav" download>  Lead  &#8226; </a> \
+					<a class="download-link" href="http://www.nimbuslaboratory.com/static/music/PluckIt/Pluckit%20-%20FX.wav" download>  Fx  </a> \
+				</h5> \
+				<audio controls class="music-player" > <source src="http://www.nimbuslaboratory.com/static/music/PluckIt/Pluckit%20-%20All.wav" type="audio/wav"> Your browser does not support the audio element. </audio>'
 			}
 
 			function loadMandlebulbs(){
@@ -666,11 +687,11 @@
 	
 	</script>
 
-	<script>
+	<!-- <script>
 		setTimeout(
 			function(){
 				document.body.removeChild(document.getElementById("renderCanvas"))
 		}, 300)
 	</script>
-	
+	 -->
 
