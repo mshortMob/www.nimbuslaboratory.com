@@ -392,11 +392,15 @@
 			function initGlobalVars(){
 				hasLoadedMandleBulbs=false;
 				hasLoadedMusic=false;
+				hasRemovedIntroGraphic=false;
 				document.getElementById('mandlebulbs')
 			}
 
 			function goToPage(pageName){
-				document.body.removeChild(document.getElementById("renderCanvas"));
+				if(!hasRemovedIntroGraphic){
+					document.body.removeChild(document.getElementById("renderCanvas"))
+					hasRemovedIntroGraphic=true;
+				}
 				document.getElementById('mobile-dropdown').style.display='none';
 				if(pageName=="music"){
 					if(!hasLoadedMusic){
