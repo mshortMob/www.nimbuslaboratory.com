@@ -392,15 +392,15 @@
 			function initGlobalVars(){
 				hasLoadedMandleBulbs=false;
 				hasLoadedMusic=false;
-				hasRemovedIntroGraphic=false;
-				document.getElementById('mandlebulbs')
+				if(window.location.search=="?mandlebulbs"){
+					goToPage("mandlebulbs");
+				}
+				if(window.location.search=="?music"){
+					goToPage("music");
+				}
 			}
 
 			function goToPage(pageName){
-				if(!hasRemovedIntroGraphic){
-					document.body.removeChild(document.getElementById("renderCanvas"))
-					hasRemovedIntroGraphic=true;
-				}
 				document.getElementById('mobile-dropdown').style.display='none';
 				if(pageName=="music"){
 					if(!hasLoadedMusic){
@@ -409,7 +409,9 @@
 					}
 					document.getElementById('music').style.display="inline";
 					document.getElementById('mandlebulbs').style.display="none";
-					document.getElementById('renderCanvas').style.display="none";
+					if(window.location.search!="?mandlebulbs" && window.location.search!="?music"){
+						document.getElementById('renderCanvas').style.display="none";
+					}
 					document.getElementById('about').style.display="none";
 				}
 				if(pageName=="mandlebulbs"){
@@ -419,7 +421,9 @@
 					}
 					document.getElementById('music').style.display="none";
 					document.getElementById('mandlebulbs').style.display="inline";
-					document.getElementById('renderCanvas').style.display="none";
+					if(window.location.search!="?mandlebulbs" && window.location.search!="?music"){
+						document.getElementById('renderCanvas').style.display="none";
+					}
 					document.getElementById('about').style.display="none";
 				}
 				if(pageName=="FlowMapper Demo"){
@@ -431,7 +435,9 @@
 				if(pageName=="about"){
 					document.getElementById('music').style.display="none";
 					document.getElementById('mandlebulbs').style.display="none";
-					document.getElementById('renderCanvas').style.display="none";
+					if(window.location.search!="?mandlebulbs" && window.location.search!="?music"){
+						document.getElementById('renderCanvas').style.display="none";
+					}
 					document.getElementById('about').style.display="inline";
 				}
 				if(pageName=="home"){
@@ -550,8 +556,12 @@
 		var windowHalfX = window.innerWidth / 2;
 		var windowHalfY = window.innerHeight / 2;
 
-		init();
-		animate();
+		if(window.location.search=="?mandlebulbs" || window.location.search=="?music"){
+			console.log("query string in use, not loading intro graphic")
+		}else{
+			init();
+			animate();
+		}
 
 		function init() {
 
@@ -721,108 +731,6 @@
 			window.location.replace("http://"+location.hostname+"/index_2.html");
 		}
 	
-	</script>
-
-	<script>
-		setTimeout(
-			function(){
-				if(window.location.search=="?music"){
-					goToPage('music');
-					
-				}
-		}, 100)
-		setTimeout(
-			function(){
-				if(window.location.search=="?music"){
-					goToPage('music');
-					
-				}
-		}, 500)
-		setTimeout(
-			function(){
-				if(window.location.search=="?music"){
-					goToPage('music');
-					
-				}
-		}, 1000)
-		setTimeout(
-			function(){
-				if(window.location.search=="?music"){
-					goToPage('music');
-					
-				}
-		}, 2000)
-		setTimeout(
-			function(){
-				if(window.location.search=="?music"){
-					goToPage('music');
-					
-				}
-		}, 3000)
-		setTimeout(
-			function(){
-				if(window.location.search=="?music"){
-					goToPage('music');
-					
-				}
-		}, 4000)
-		setTimeout(
-			function(){
-				if(window.location.search=="?music"){
-					goToPage('music');
-					
-				}
-		}, 5000)
-		//---------------------------------------------------------------------------------------------------
-		setTimeout(
-			function(){
-				if(window.location.search=="?mandlebulbs"){
-					goToPage('mandlebulbs');
-					
-				}
-		}, 100)
-		setTimeout(
-			function(){
-				if(window.location.search=="?mandlebulbs"){
-					goToPage('mandlebulbs');
-					
-				}
-		}, 500)
-		setTimeout(
-			function(){
-				if(window.location.search=="?mandlebulbs"){
-					goToPage('mandlebulbs');
-					
-				}
-		}, 1000)
-		setTimeout(
-			function(){
-				if(window.location.search=="?mandlebulbs"){
-					goToPage('mandlebulbs');
-					
-				}
-		}, 2000)
-		setTimeout(
-			function(){
-				if(window.location.search=="?mandlebulbs"){
-					goToPage('mandlebulbs');
-					
-				}
-		}, 3000)
-		setTimeout(
-			function(){
-				if(window.location.search=="?mandlebulbs"){
-					goToPage('mandlebulbs');
-					
-				}
-		}, 4000)
-		setTimeout(
-			function(){
-				if(window.location.search=="?mandlebulbs"){
-					goToPage('mandlebulbs');
-					
-				}
-		}, 5000)
 	</script>
 	
 
