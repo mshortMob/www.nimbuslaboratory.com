@@ -771,12 +771,25 @@
 					<button class="mandlebulb_Page_Button" onclick="loadManblebulbPage(parseInt(this.innerHTML))">2</button> \
 					<button class="mandlebulb_Page_Button" onclick="loadManblebulbPage(parseInt(this.innerHTML))">3</button> \
 					<button class="mandlebulb_Page_Button" onclick="loadManblebulbPage(parseInt(this.innerHTML))">4</button> \
+					<button class="mandlebulb_Page_Button" onclick="loadManblebulbPage(parseInt(this.innerHTML))">5</button> \
 				</div>'
 			}
 		
 			function loadManblebulbPage(mandlebulbPageNumber){
-				for(var x=1; x<13; x++){
-					document.getElementById("mp"+x).src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%20"+parseInt(x+(12*(mandlebulbPageNumber-1)))+".mp4"
+				console.log("mandlebulbPageNumber:"+mandlebulbPageNumber)
+				if(mandlebulbPageNumber!=5){
+					for(var x=1; x<13; x++){
+						document.getElementById("mp"+x).src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%20"+parseInt(x+(12*(mandlebulbPageNumber-1)))+".mp4"
+						document.getElementById("mp"+x).style.display='inline';
+					}
+				}else{
+					for(var x=1; x<13; x++){
+						document.getElementById("mp"+x).style.display='none';
+					}
+					for(var x=1; x<4; x++){
+						document.getElementById("mp"+x).src="http://www.nimbuslaboratory.com/static/mandlebulbs/Scene"+parseInt(x)+".mp4"
+						document.getElementById("mp"+x).style.display='inline';
+					}					
 				}
 			}
 			
