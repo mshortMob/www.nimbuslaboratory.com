@@ -405,9 +405,13 @@
 				if(window.location.search=="?mandlebulbs"){
 					goToPage("mandlebulbs");
 				}
-				if(window.location.search.indexOf('mandlebulbs')!=-1 && parseInt(window.location.search.split('/')[1])!=NaN){
+				if(window.location.search.indexOf('mandlebulbs')!=-1){
+					pageNum=parseInt(window.location.search.split('/')[1]);
+					if(isNaN(pageNum)){
+						pageNum=1;
+					}
 					goToPage("mandlebulbs");
-					loadManblebulbPage(parseInt(window.location.search.split('/')[1]));
+					loadManblebulbPage(pageNum);
 				}
 				if(window.location.search=="?music"){
 					goToPage("music");
@@ -1023,7 +1027,7 @@
 		var windowHalfX = window.innerWidth / 2;
 		var windowHalfY = window.innerHeight / 2;
 
-		if(window.location.search=="?mandlebulbs" || window.location.search=="?music"){
+		if(window.location.search.indexOf("?mandlebulbs") !== -1 || window.location.search=="?music"){
 			console.log("query string in use, not loading intro graphic")
 		}else{
 			init();
