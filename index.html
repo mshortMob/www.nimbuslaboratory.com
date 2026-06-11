@@ -138,6 +138,7 @@
 			}
 			#mandlebulb_Page_Buttons{
 				margin-left:25px;
+				margin-top:20px;
 			}
 			.mandlebulb_Page_Button{
 				margin-top:0px;
@@ -306,6 +307,7 @@
 			}
 			#mandlebulb_Page_Buttons{
 				margin-left:25px;
+				margin-top:20px;
 			}
 			.mandlebulb_Page_Button{
 				margin-top:0px;
@@ -388,6 +390,13 @@
 
 		<script>
 			
+			var page5Links = [
+				{ text: 'Scene1.toe', href: 'http://www.nimbuslaboratory.com/static/mandlebulbs/Scene1.toe' },
+				{ text: 'Scene2.toe', href: 'http://www.nimbuslaboratory.com/static/mandlebulbs/Scene2.toe' },
+				{ text: 'Scene3.toe', href: 'http://www.nimbuslaboratory.com/static/mandlebulbs/Scene3.toe' },
+				{ text: 'Scene4.toe', href: 'http://www.nimbuslaboratory.com/static/mandlebulbs/Scene4.toe' }
+			];
+
 			initGlobalVars();
 			function initGlobalVars(){
 				hidePaul();
@@ -948,6 +957,19 @@
 					<button class="mandlebulb_Page_Button" onclick="loadManblebulbPage(parseInt(this.innerHTML))">4</button> \
 					<button class="mandlebulb_Page_Button" onclick="loadManblebulbPage(parseInt(this.innerHTML))">5</button> \
 				</div>'
+				var pageButtonsDiv = document.getElementById('mandlebulb_Page_Buttons');
+				for(var i=0; i<4; i++){
+					var div = document.createElement('div');
+					div.className = 'mandlebulb-item';
+					div.id = 'mp'+(i+5)+'_link';
+					div.style.cssText = 'display:none;padding:8px 0;align-items:flex-start;justify-content:center;vertical-align:top;';
+					var a = document.createElement('a');
+					a.href = page5Links[i].href;
+					a.textContent = page5Links[i].text;
+					a.style.cssText = 'color:#4a9eff;font-size:16px;text-decoration:underline;';
+					div.appendChild(a);
+					document.getElementById('mandlebulbs').insertBefore(div, pageButtonsDiv);
+				}
 			}
 		
 			function loadManblebulbPage(mandlebulbPageNumber){
@@ -957,6 +979,11 @@
 						document.getElementById("mp"+x).src="http://www.nimbuslaboratory.com/static/mandlebulbs/Fractals%20"+parseInt(x+(12*(mandlebulbPageNumber-1)))+".mp4"
 						document.getElementById("mp"+x).style.display='inline';
 					}
+					if(document.getElementById("mp5_link")){
+						for(var x=5; x<9; x++){
+							document.getElementById("mp"+x+"_link").style.display='none';
+						}
+					}
 				}else{
 					for(var x=1; x<13; x++){
 						document.getElementById("mp"+x).style.display='none';
@@ -964,7 +991,10 @@
 					for(var x=1; x<5; x++){
 						document.getElementById("mp"+x).src="http://www.nimbuslaboratory.com/static/mandlebulbs/Scene"+parseInt(x)+".mp4"
 						document.getElementById("mp"+x).style.display='inline';
-					}					
+					}
+					for(var x=5; x<9; x++){
+						document.getElementById("mp"+x+"_link").style.display='inline-flex';
+					}
 				}
 			}
 			
