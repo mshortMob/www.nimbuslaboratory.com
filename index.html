@@ -414,7 +414,7 @@
 					}
 					document.getElementById('music').style.display="inline";
 					document.getElementById('mandlebulbs').style.display="none";
-					if(window.location.search!="?mandlebulbs" && window.location.search!="?music"){
+					if(window.location.search.indexOf("mandlebulbs")==-1 && window.location.search!="?music"){
 						document.getElementById('renderCanvas').style.display="none";
 					}
 					document.getElementById('about').style.display="none";
