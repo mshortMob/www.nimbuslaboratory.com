@@ -396,6 +396,10 @@
 				if(window.location.search=="?mandlebulbs"){
 					goToPage("mandlebulbs");
 				}
+				if(window.location.search.indexOf('mandlebulbs')!=-1 && parseInt(window.location.search.split('/')[1])!=NaN){
+					goToPage("mandlebulbs");
+					loadManblebulbPage(parseInt(window.location.search.split('/')[1]));
+				}
 				if(window.location.search=="?music"){
 					goToPage("music");
 				}
@@ -422,7 +426,7 @@
 					}
 					document.getElementById('music').style.display="none";
 					document.getElementById('mandlebulbs').style.display="inline";
-					if(window.location.search!="?mandlebulbs" && window.location.search!="?music"){
+					if(window.location.search.indexOf("mandlebulbs")!=-1 && window.location.search!="?music"){
 						document.getElementById('renderCanvas').style.display="none";
 					}
 					document.getElementById('about').style.display="none";
